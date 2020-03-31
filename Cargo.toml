@@ -1,0 +1,9 @@
+[package]
+name = "tranquility"
+description = "Reserved"
+license = "MIT"
+version = "0.0.1"
+authors = ["Elinvynia <59487684+Elinvynia@users.noreply.github.com>"]
+edition = "2018"
+
+[dependencies]
