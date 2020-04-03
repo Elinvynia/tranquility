@@ -3,12 +3,12 @@ name = "tranquility"
 description = "A Rust library for the Reddit API."
 documentation = "https://docs.rs/tranquility"
 homepage = "https://github.com/Elinvynia/tranquility"
-repository = "https://github.com/serenity-rs/serenity.git"
+repository = "https://github.com/Elinvynia/tranquility.git"
 keywords = ["reddit", "api"]
 authors = ["Elinvynia <59487684+Elinvynia@users.noreply.github.com>"]
 readme = "README.md"
 license = "MIT"
-version = "0.0.2"
+version = "0.0.3"
 edition = "2018"
 
 [dependencies]
