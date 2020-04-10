@@ -1,1 +1,5 @@
-pub use crate::model::{me::Me, subreddit::Subreddit};
+pub use crate::model::{
+    subreddit::Subreddit,
+    user::User,
+    usersubreddit::UserSubreddit
+};
