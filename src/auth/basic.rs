@@ -1,17 +1,12 @@
-use crate::{
-    auth::Auth,
-    error::Error,
-};
+//! The basic authentication method, using a reddit username and password.
 
-use reqwest::{
-    Client as HttpClient,
-    Response,
-};
-
+use crate::{auth::Auth, error::Error, client::route::Route};
+use reqwest::{Client as HttpClient, Response};
 use async_trait::async_trait;
 
 /// The basic authentication method for Reddit bots.
 /// It requires the use of the "script" account type.
+#[derive(Debug)]
 pub struct BasicAuth {
     /// The application ID.
     pub client_id: String,
@@ -25,6 +20,7 @@ pub struct BasicAuth {
 }
 
 impl BasicAuth {
+    /// Builder for the BasicAuth method.
     pub async fn new(
         client_id: String,
         secret_key: String,
@@ -77,11 +73,10 @@ impl Auth for BasicAuth {
         Ok(token)
     }
 
-    async fn get(&self, route: &str, key: &str, user_agent: &str) -> Result<Response, Error> {
-        let url = format!("https://oauth.reddit.com{}", route);
+    async fn get(&self, route: Route, key: &str, user_agent: &str) -> Result<Response, Error> {
         let request = self
             .http_client
-            .get(&url)
+            .get(&route.to_string())
             .header("User-Agent", user_agent)
             .bearer_auth(key);
 

@@ -1,43 +1,10 @@
+//! Contains the user's subreddit model.
+
 use serde::{Deserialize, Serialize};
 
+/// A subreddit that is part of the user's profile.
 #[derive(Serialize, Deserialize, Debug)]
 pub struct UserSubreddit {
-    pub default_set: bool,
-    pub user_is_contributor: bool,
-    pub banner_img: String,
-    pub restrict_posting: bool,
-    pub user_is_banned: bool,
-    pub free_form_reports: bool,
-    pub community_icon: String,
-    pub show_media: bool,
-    pub icon_color: String,
-    pub user_is_muted: bool,
-    pub display_name: String,
-    pub header_img: Option<String>,
-    pub title: String,
-    pub previous_names: Vec<String>,
-    pub over_18: bool,
-    pub icon_size: Vec<i64>,
-    pub primary_color: String,
-    pub icon_img: String,
+    /// The description of the subreddit.
     pub description: String,
-    pub submit_link_label: String,
-    pub header_size: Option<Vec<i64>>,
-    pub restrict_commenting: bool,
-    pub subscribers: i64,
-    pub submit_text_label: String,
-    pub is_default_icon: bool,
-    pub link_flair_position: String,
-    pub display_name_prefixed: String,
-    pub key_color: String,
-    pub name: String,
-    pub is_default_banner: bool,
-    pub url: String,
-    pub banner_size: Vec<i64>,
-    pub user_is_moderator: bool,
-    pub public_description: String,
-    pub link_flair_enabled: bool,
-    pub disable_contributor_requests: bool,
-    pub subreddit_type: String,
-    pub user_is_subscriber: bool,
 }

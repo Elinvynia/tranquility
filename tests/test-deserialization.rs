@@ -4,7 +4,6 @@ use tranquility::model::prelude::*;
 macro_rules! test_deser {
     ($filename:expr, $struct:ident) => {
         let name = format!("./tests/json/{}.json", $filename);
-        println!("{:?}", &name);
         let path = Path::new(&name);
         let mut file = File::open(&path).expect("Failed to open file");
         let mut contents = "".to_string();

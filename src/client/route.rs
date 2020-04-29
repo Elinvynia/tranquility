@@ -1,8 +1,8 @@
 use std::fmt;
 
+#[derive(Debug)]
 pub enum Route {
     UserAbout(String),
-    SubredditAbout(String),
 }
 
 impl fmt::Display for Route {
@@ -10,7 +10,6 @@ impl fmt::Display for Route {
         let base = "https://oauth.reddit.com";
         let route = match self {
             Route::UserAbout(ua) => format!("/user/{}/about", ua),
-            Route::SubredditAbout(sa) => format!("/r/{}/about", sa),
         };
         write!(f, "{}{}", base, route)
     }

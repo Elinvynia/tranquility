@@ -1,12 +1,18 @@
+//! The error type for this library.
+
 use reqwest::Error as HttpError;
 use serde_json::Error as JsonError;
 use std::error::Error as StdError;
 use std::{fmt, fmt::Display};
 
+/// The generic error type used for handling errors within this library.
 #[derive(Debug)]
 pub enum Error {
+    /// Serde errors.
     Json(JsonError),
+    /// Reqwest errors.
     Http(HttpError),
+    /// Any other error which couldn't be represented well otherwise.
     Custom(String),
 }
 
