@@ -1,7 +1,7 @@
 //! Module related to the user struct.
 
 use crate::model::usersubreddit::UserSubreddit;
-use serde::{Deserialize};
+use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
 /// The struct representing a reddit user.

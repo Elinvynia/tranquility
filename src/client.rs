@@ -6,10 +6,7 @@ use crate::{
     auth::Auth,
     client::route::Route,
     error::Error,
-    model::{
-        user::User,
-        thing::unwrap_thing,
-    },
+    model::{thing::unwrap_thing, user::User},
 };
 use reqwest::Response;
 

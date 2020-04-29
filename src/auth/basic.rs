@@ -1,8 +1,8 @@
 //! The basic authentication method, using a reddit username and password.
 
-use crate::{auth::Auth, error::Error, client::route::Route};
-use reqwest::{Client as HttpClient, Response};
+use crate::{auth::Auth, client::route::Route, error::Error};
 use async_trait::async_trait;
+use reqwest::{Client as HttpClient, Response};
 
 /// The basic authentication method for Reddit bots.
 /// It requires the use of the "script" account type.

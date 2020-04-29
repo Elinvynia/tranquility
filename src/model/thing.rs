@@ -1,7 +1,7 @@
 //! A model for the reddit response wrapper.
 
-use serde_json::{Map, Value};
 use crate::error::Error;
+use serde_json::{Map, Value};
 
 /// An enum representing the kind of wrapped reddit API responses.
 #[derive(Debug)]
@@ -17,7 +17,7 @@ pub enum Thing {
     /// Subreddit "t5"
     Subreddit,
     /// Award "t6"
-    Award
+    Award,
 }
 
 impl From<&str> for Thing {
@@ -29,7 +29,7 @@ impl From<&str> for Thing {
             "t4" => Thing::Message,
             "t5" => Thing::Subreddit,
             "t6" => Thing::Award,
-            _ => unreachable!()
+            _ => unreachable!(),
         }
     }
 }
