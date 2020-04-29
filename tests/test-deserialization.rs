@@ -1,5 +1,5 @@
 use std::{fs::File, io::prelude::*, path::Path};
-use tranquility::model::prelude::*;
+use tranquility::{model::thing::unwrap_thing, model::prelude::*};
 
 macro_rules! test_deser {
     ($filename:expr, $struct:ident) => {
@@ -10,8 +10,13 @@ macro_rules! test_deser {
         file.read_to_string(&mut contents)
             .expect("Failed to read file.");
 
-        let _deserialized: $struct =
-            serde_json::from_str(&contents).expect("Failed to deserialize.");
+        if let Ok(v) = unwrap_thing(&contents) {
+            let _deserialized: $struct = serde_json::from_str(&v).expect("Failed to deserialize.");
+        }
+
+        else {
+            let _deserialized: $struct = serde_json::from_str(&contents).expect("Failed to deserialize.");
+        }
     };
 }
 

@@ -45,7 +45,8 @@ impl<T: Auth + Send + Sync> Client<T> {
     /// Retrieves the user information given a username.
     pub async fn user(&self, username: &str) -> Result<User, Error> {
         let response = self.get(Route::UserAbout(username.to_string())).await?;
-        let map = unwrap_thing(response).await?;
+        let body = response.text().await?;
+        let map = unwrap_thing(&body)?;
         let user: User = serde_json::from_str(&map)?;
         Ok(user)
     }

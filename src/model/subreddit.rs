@@ -5,5 +5,5 @@ use serde::{Deserialize, Serialize};
 /// The struct representing a subreddit.
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Subreddit {
-    kind: String,
+    description: String,
 }
