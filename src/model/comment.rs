@@ -11,4 +11,6 @@ pub struct Comment {
     pub approved_at_utc: Option<u64>,
     /// The total amount of upvotes this comment has received.
     pub ups: i64,
+    /// The ID of the comment.
+    pub id: String,
 }
