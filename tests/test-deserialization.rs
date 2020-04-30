@@ -28,3 +28,9 @@ fn test_user() {
 fn test_subreddit() {
     test_deser!("subreddit", Subreddit);
 }
+
+#[test]
+fn test_comment() {
+    test_deser!("comment", Comment);
+}
+
