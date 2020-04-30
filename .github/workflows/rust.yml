@@ -39,6 +39,7 @@ jobs:
         command: test
 
   clippy:
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
     - name: Install toolchain
@@ -55,6 +56,7 @@ jobs:
         args: --all-features
 
   format:
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
     - name: Install toolchain
