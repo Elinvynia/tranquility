@@ -12,5 +12,5 @@ pub struct Comment {
     /// The total amount of upvotes this comment has received.
     pub ups: i64,
     /// The ID of the comment.
-    pub id: String,
+    pub id: String
 }
