@@ -28,7 +28,6 @@ jobs:
         profile: minimal
         toolchain: ${{ matrix.rust }}
         override: true
-        components: rustfmt, clippy
     - name: Build
       uses: actions-rs/cargo@v1
       with:
@@ -48,7 +47,7 @@ jobs:
         profile: minimal
         toolchain: stable
         override: true
-        components: rustfmt, clippy
+        components: clippy
     - name: Run clippy
       uses: actions-rs/clippy-check@v1
       with:
@@ -65,9 +64,9 @@ jobs:
         profile: minimal
         toolchain: stable
         override: true
-        components: rustfmt, clippy
+        components: rustfmt
     - name: Check formatting
       uses: actions-rs/cargo@v1
       with:
         command: fmt
-        args: --check
+        args: -- --check
