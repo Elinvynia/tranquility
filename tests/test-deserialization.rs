@@ -33,4 +33,3 @@ fn test_subreddit() {
 fn test_comment() {
     test_deser!("comment", Comment);
 }
-
