@@ -6,9 +6,12 @@ use crate::{
     auth::Auth,
     client::route::Route,
     error::Error,
-    model::{thing::unwrap_thing, user::User},
+    model::{subreddit::Subreddit, thing::Thing, user::User},
 };
+use futures_timer::Delay;
 use reqwest::Response;
+use std::convert::TryInto;
+use std::time::Duration;
 
 /// The client handling the requests.
 #[derive(Debug)]
@@ -25,26 +28,68 @@ impl<T: Auth + Send + Sync> Client<T> {
     /// The function used to construct a new client.
     pub async fn new(user_agent: &str, auth_method: T) -> Result<Self, Error> {
         let access_token = auth_method.login().await?;
-        let ua = user_agent.to_string();
         Ok(Client {
             auth: auth_method,
             access_token,
-            user_agent: ua,
+            user_agent: user_agent.to_string(),
         })
     }
 
-    async fn get(&self, route: Route) -> Result<Response, Error> {
-        self.auth
+    async fn get(self, route: Route) -> Result<Response, Error> {
+        let response = self
+            .auth
             .get(route, &self.access_token, &self.user_agent)
-            .await
+            .await?;
+
+        self.handle_ratelimit(&response).await?;
+        Ok(response)
+    }
+
+    async fn handle_ratelimit(self, response: &Response) -> Result<(), Error> {
+        let headers = response.headers();
+        let _used: u64 = headers
+            .get("x-ratelimit-used")
+            .ok_or_else(|| Error::MissingHeader("x-ratelimit-used".to_string()))?
+            .to_str()?
+            .parse()?;
+
+        let remaining: u64 = headers
+            .get("x-ratelimit-remaining")
+            .ok_or_else(|| Error::MissingHeader("x-ratelimit-remaining".to_string()))?
+            .to_str()?
+            .parse::<f64>()?
+            .to_bits();
+
+        let reset: u64 = headers
+            .get("x-ratelimit-reset")
+            .ok_or_else(|| Error::MissingHeader("x-ratelimit-reset".to_string()))?
+            .to_str()?
+            .parse()?;
+
+        if remaining < 1 {
+            let _ = Delay::new(Duration::from_secs(reset)).await;
+        }
+
+        Ok(())
     }
 
     /// Retrieves the user information given a username.
-    pub async fn user(&self, username: &str) -> Result<User, Error> {
+    pub async fn user(self, username: &str) -> Result<User, Error> {
         let response = self.get(Route::UserAbout(username.to_string())).await?;
         let body = response.text().await?;
-        let map = unwrap_thing(&body)?;
-        let user: User = serde_json::from_str(&map)?;
+        let thing: Thing = serde_json::from_str(&body)?;
+        let user: User = Thing::try_into(thing)?;
+        Ok(user)
+    }
+
+    /// Retrieves the subreddit information given the name.
+    pub async fn subreddit(self, subreddit: &str) -> Result<Subreddit, Error> {
+        let response = self
+            .get(Route::SubredditAbout(subreddit.to_string()))
+            .await?;
+        let body = response.text().await?;
+        let thing: Thing = serde_json::from_str(&body)?;
+        let user: Subreddit = Thing::try_into(thing)?;
         Ok(user)
     }
 }

@@ -3,6 +3,7 @@
 use crate::{auth::Auth, client::route::Route, error::Error};
 use async_trait::async_trait;
 use reqwest::{Client as HttpClient, Response};
+use std::time::{Duration, SystemTime};
 
 /// The basic authentication method for Reddit bots.
 /// It requires the use of the "script" account type.
@@ -16,6 +17,7 @@ pub struct BasicAuth {
     pub username: String,
     /// The password of the bot account.
     pub password: String,
+    pub(crate) expiration: Duration,
     http_client: HttpClient,
 }
 
@@ -33,6 +35,7 @@ impl BasicAuth {
             username,
             password,
             http_client: HttpClient::new(),
+            expiration: Duration::from_secs(3600),
         }
     }
 }
@@ -56,27 +59,27 @@ impl Auth for BasicAuth {
         let json: serde_json::Value = serde_json::from_str(&response)?;
         let map = json.as_object().ok_or_else(|| "Bad response")?;
 
-        if let Some(e) = map.get("error") {
-            return Err(Error::Custom(format!(
-                "Error {}: {}",
-                e,
-                map.get("message").unwrap()
-            )));
-        };
-
-        let token = map
+        let token: String = map
             .get("access_token")
-            .unwrap()
-            .to_string()
-            .replace(r#"""#, "");
+            .ok_or_else(|| "Authentication failed")?
+            .as_str()
+            .ok_or_else(|| "Authentication failed")?
+            .to_string();
 
         Ok(token)
     }
 
     async fn get(&self, route: Route, key: &str, user_agent: &str) -> Result<Response, Error> {
+        if SystemTime::now()
+            .duration_since(SystemTime::UNIX_EPOCH)
+            .expect("Your system time is before Linux Epoch")
+            > self.expiration
+        {
+            self.login().await?;
+        };
         let request = self
             .http_client
-            .get(&route.to_string())
+            .get(&format!("{}{}", route.to_string(), "?raw_json=1"))
             .header("User-Agent", user_agent)
             .bearer_auth(key);
 

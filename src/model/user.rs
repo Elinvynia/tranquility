@@ -3,7 +3,7 @@
 use crate::model::usersubreddit::UserSubreddit;
 use serde::Deserialize;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 /// The struct representing a reddit user.
 pub struct User {
     /// The comment karma of the user.
