@@ -14,7 +14,7 @@ pub trait Auth {
         unimplemented!()
     }
 
-    /// Performs a GET request using the
+    /// Performs a GET request using the auth method.
     async fn get(&self, _route: Route, _key: &str, _user_agent: &str) -> Result<Response, Error> {
         unimplemented!()
     }

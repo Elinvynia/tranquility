@@ -2,5 +2,5 @@
 use serde::Deserialize;
 
 /// The struct representing a message.
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct Message {}

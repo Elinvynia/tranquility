@@ -3,5 +3,5 @@
 use serde::{Deserialize, Serialize};
 
 /// The struct representing an award.
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Award {}

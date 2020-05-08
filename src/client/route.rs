@@ -4,6 +4,7 @@ use std::fmt;
 pub enum Route {
     UserAbout(String),
     SubredditAbout(String),
+    SubredditHot(String),
 }
 
 impl fmt::Display for Route {
@@ -12,6 +13,7 @@ impl fmt::Display for Route {
         let route = match self {
             Route::UserAbout(ua) => format!("/user/{}/about", ua),
             Route::SubredditAbout(sa) => format!("/r/{}/about", sa),
+            Route::SubredditHot(sh) => format!("/r/{}/hot", sh),
         };
         write!(f, "{}{}", base, route)
     }

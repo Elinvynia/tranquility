@@ -2,7 +2,8 @@
 
 use crate::error::Error;
 use crate::model::{
-    award::Award, comment::Comment, link::Link, message::Message, subreddit::Subreddit, user::User,
+    award::Award, comment::Comment, link::Link, listing::Listing, message::Message,
+    subreddit::Subreddit, user::User,
 };
 use serde::de::Error as DeError;
 use serde::{Deserialize, Deserializer};
@@ -10,7 +11,7 @@ use serde_json::{Map, Value};
 use std::convert::TryFrom;
 
 /// An enum representing the kind of wrapped reddit API responses.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Thing {
     /// Comment "t1"
     Comment(Comment),
@@ -24,6 +25,8 @@ pub enum Thing {
     Subreddit(Subreddit),
     /// Award "t6"
     Award(Award),
+    /// Listing "Listing"
+    Listing(Listing),
 }
 
 impl<'de> Deserialize<'de> for Thing {
@@ -72,6 +75,11 @@ impl<'de> Deserialize<'de> for Thing {
                     .map_err(|_| DeError::custom("failed to deserialize data"))?;
                 Thing::Award(value)
             }
+            "Listing" => {
+                let value: Listing = serde_json::from_value(data.clone())
+                    .map_err(|_| DeError::custom("failed to deserialize data"))?;
+                Thing::Listing(value)
+            }
             _ => unreachable!(),
         })
     }
@@ -107,7 +115,31 @@ impl TryFrom<Thing> for Comment {
         match value {
             Thing::Comment(c) => Ok(c),
             _ => Err(Error::Serde(DeError::custom(
-                "failed to convert Thing to Subreddit",
+                "failed to convert Thing to Comment",
+            ))),
+        }
+    }
+}
+
+impl TryFrom<Thing> for Link {
+    type Error = Error;
+    fn try_from(value: Thing) -> Result<Self, Self::Error> {
+        match value {
+            Thing::Link(l) => Ok(l),
+            _ => Err(Error::Serde(DeError::custom(
+                "failed to convert Thing to Link",
+            ))),
+        }
+    }
+}
+
+impl TryFrom<Thing> for Listing {
+    type Error = Error;
+    fn try_from(value: Thing) -> Result<Self, Self::Error> {
+        match value {
+            Thing::Listing(l) => Ok(l),
+            _ => Err(Error::Serde(DeError::custom(
+                "failed to convert Thing to Listing",
             ))),
         }
     }

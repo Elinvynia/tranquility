@@ -3,7 +3,7 @@
 use serde::{Deserialize, Serialize};
 
 /// A comment that can be anywhere.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Comment {
     /// The total amount of awards that this comment has received.
     pub total_awards_received: u64,

@@ -3,5 +3,8 @@
 use serde::Deserialize;
 
 /// The struct representing a post on reddit.
-#[derive(Debug, Deserialize)]
-pub struct Link {}
+#[derive(Debug, Deserialize, Clone)]
+pub struct Link {
+    /// The title of the link.
+    pub title: String,
+}

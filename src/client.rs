@@ -6,7 +6,7 @@ use crate::{
     auth::Auth,
     client::route::Route,
     error::Error,
-    model::{subreddit::Subreddit, thing::Thing, user::User},
+    model::{link::Link, listing::Listing, subreddit::Subreddit, thing::Thing, user::User},
 };
 use futures_timer::Delay;
 use reqwest::Response;
@@ -35,7 +35,7 @@ impl<T: Auth + Send + Sync> Client<T> {
         })
     }
 
-    async fn get(self, route: Route) -> Result<Response, Error> {
+    async fn get(&self, route: Route) -> Result<Response, Error> {
         let response = self
             .auth
             .get(route, &self.access_token, &self.user_agent)
@@ -45,7 +45,7 @@ impl<T: Auth + Send + Sync> Client<T> {
         Ok(response)
     }
 
-    async fn handle_ratelimit(self, response: &Response) -> Result<(), Error> {
+    async fn handle_ratelimit(&self, response: &Response) -> Result<(), Error> {
         let headers = response.headers();
         let _used: u64 = headers
             .get("x-ratelimit-used")
@@ -74,7 +74,7 @@ impl<T: Auth + Send + Sync> Client<T> {
     }
 
     /// Retrieves the user information given a username.
-    pub async fn user(self, username: &str) -> Result<User, Error> {
+    pub async fn user(&self, username: &str) -> Result<User, Error> {
         let response = self.get(Route::UserAbout(username.to_string())).await?;
         let body = response.text().await?;
         let thing: Thing = serde_json::from_str(&body)?;
@@ -83,7 +83,7 @@ impl<T: Auth + Send + Sync> Client<T> {
     }
 
     /// Retrieves the subreddit information given the name.
-    pub async fn subreddit(self, subreddit: &str) -> Result<Subreddit, Error> {
+    pub async fn subreddit(&self, subreddit: &str) -> Result<Subreddit, Error> {
         let response = self
             .get(Route::SubredditAbout(subreddit.to_string()))
             .await?;
@@ -91,5 +91,19 @@ impl<T: Auth + Send + Sync> Client<T> {
         let thing: Thing = serde_json::from_str(&body)?;
         let user: Subreddit = Thing::try_into(thing)?;
         Ok(user)
+    }
+
+    pub(crate) async fn hot(&self, subreddit: &str) -> Result<Vec<Link>, Error> {
+        let response = self.get(Route::SubredditHot(subreddit.to_string())).await?;
+        let body = response.text().await?;
+        let thing: Thing = serde_json::from_str(&body)?;
+        let listing: Listing = Thing::try_into(thing)?;
+        let mut links: Vec<Link> = Vec::new();
+        for x in &listing.children {
+            let y = x.clone();
+            let link: Link = Thing::try_into(y)?;
+            links.push(link);
+        }
+        Ok(links)
     }
 }

@@ -3,6 +3,7 @@
 use crate::{auth::Auth, client::route::Route, error::Error};
 use async_trait::async_trait;
 use reqwest::{Client as HttpClient, Response};
+use std::sync::{Arc, RwLock};
 use std::time::{Duration, SystemTime};
 
 /// The basic authentication method for Reddit bots.
@@ -17,7 +18,7 @@ pub struct BasicAuth {
     pub username: String,
     /// The password of the bot account.
     pub password: String,
-    pub(crate) expiration: Duration,
+    pub(crate) expiration: Arc<RwLock<Duration>>,
     http_client: HttpClient,
 }
 
@@ -35,7 +36,7 @@ impl BasicAuth {
             username,
             password,
             http_client: HttpClient::new(),
-            expiration: Duration::from_secs(3600),
+            expiration: Arc::new(RwLock::new(Duration::from_secs(3600))),
         }
     }
 }
@@ -59,24 +60,50 @@ impl Auth for BasicAuth {
         let json: serde_json::Value = serde_json::from_str(&response)?;
         let map = json.as_object().ok_or_else(|| "Bad response")?;
 
+        let expiration: u64 = map
+            .get("expires_in")
+            .ok_or_else(|| "No `expires_in` field in response")?
+            .as_u64()
+            .ok_or_else(|| "`expires_in` field is an invalid type")?;
+
+        {
+            let mut exp = self
+                .expiration
+                .write()
+                .map_err(|_| "Expiration lock is poisoned")?;
+            *exp = Duration::from_secs(expiration);
+        }
+
         let token: String = map
             .get("access_token")
-            .ok_or_else(|| "Authentication failed")?
+            .ok_or_else(|| "No `access_token` field in response")?
             .as_str()
-            .ok_or_else(|| "Authentication failed")?
+            .ok_or_else(|| "`access_token` field is an invalid type")?
             .to_string();
 
         Ok(token)
     }
 
     async fn get(&self, route: Route, key: &str, user_agent: &str) -> Result<Response, Error> {
-        if SystemTime::now()
-            .duration_since(SystemTime::UNIX_EPOCH)
-            .expect("Your system time is before Linux Epoch")
-            > self.expiration
+        let mut login = false;
         {
+            let exp = self
+                .expiration
+                .read()
+                .map_err(|_| "Expiration lock is poisoned")?;
+            if SystemTime::now()
+                .duration_since(SystemTime::UNIX_EPOCH)
+                .expect("Your system time is before Linux Epoch")
+                > *exp
+            {
+                login = true;
+            };
+        }
+
+        if login {
             self.login().await?;
         };
+
         let request = self
             .http_client
             .get(&format!("{}{}", route.to_string(), "?raw_json=1"))

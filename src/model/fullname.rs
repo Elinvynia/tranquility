@@ -1,4 +1,7 @@
+//! Module containing the fullname struct.
+
 use serde::Deserialize;
 
-#[derive(Debug, Deserialize)]
-pub(crate) struct Fullname(String);
+/// Fullname is the reddit unique ID for a thing, including the type prefix.
+#[derive(Debug, Deserialize, Clone)]
+pub struct Fullname(String);

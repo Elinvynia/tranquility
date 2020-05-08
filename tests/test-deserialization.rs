@@ -1,7 +1,6 @@
 use std::convert::TryInto;
 use std::{fs::File, io::prelude::*, path::Path};
 use tranquility::model::prelude::*;
-use tranquility::model::thing::Thing;
 
 macro_rules! test_deser {
     ($filename:expr, $thing:ident, $struct:ident) => {
@@ -42,4 +41,9 @@ fn test_subreddit() {
 #[test]
 fn test_comment() {
     test_deser!("comment", Thing, Comment);
+}
+
+#[test]
+fn test_link() {
+    test_deser!("link", Thing, Link);
 }

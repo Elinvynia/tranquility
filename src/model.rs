@@ -2,9 +2,9 @@
 
 pub mod award;
 pub mod comment;
-pub(crate) mod fullname;
+pub mod fullname;
 pub mod link;
-pub(crate) mod listing;
+pub mod listing;
 pub mod message;
 pub mod prelude;
 pub mod subreddit;
