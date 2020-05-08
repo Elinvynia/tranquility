@@ -6,12 +6,12 @@ use crate::model::{
     subreddit::Subreddit, user::User,
 };
 use serde::de::Error as DeError;
-use serde::{Deserialize, Deserializer};
+use serde::{Deserialize, Deserializer, Serialize};
 use serde_json::{Map, Value};
 use std::convert::TryFrom;
 
 /// An enum representing the kind of wrapped reddit API responses.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub enum Thing {
     /// Comment "t1"
     Comment(Comment),

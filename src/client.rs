@@ -93,16 +93,18 @@ impl<T: Auth + Send + Sync> Client<T> {
         Ok(user)
     }
 
-    pub(crate) async fn hot(&self, subreddit: &str) -> Result<Vec<Link>, Error> {
-        let response = self.get(Route::SubredditHot(subreddit.to_string())).await?;
+    pub(crate) async fn get_posts(&self, route: Route) -> Result<Vec<Link>, Error> {
+        let response = self.get(route).await?;
         let body = response.text().await?;
         let thing: Thing = serde_json::from_str(&body)?;
         let listing: Listing = Thing::try_into(thing)?;
         let mut links: Vec<Link> = Vec::new();
-        for x in &listing.children {
-            let y = x.clone();
-            let link: Link = Thing::try_into(y)?;
-            links.push(link);
+        if let Some(c) = &listing.children {
+            for x in c {
+                let y = x.clone();
+                let link: Link = Thing::try_into(y)?;
+                links.push(link);
+            }
         }
         Ok(links)
     }

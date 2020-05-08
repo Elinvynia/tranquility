@@ -1,6 +1,6 @@
 //! Module for the message struct.
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 /// The struct representing a message.
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Message {}

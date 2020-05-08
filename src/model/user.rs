@@ -1,9 +1,9 @@
 //! Module related to the user struct.
 
 use crate::model::usersubreddit::UserSubreddit;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 /// The struct representing a reddit user.
 pub struct User {
     /// The comment karma of the user.

@@ -1,18 +1,18 @@
 //! Module containing the Listing struct.
 
 use crate::model::{fullname::Fullname, thing::Thing};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 /// Listing is the general struct returned by most methods, containing the actual data and options to filter the data returned.
 #[serde(default)]
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Listing {
     /// Legacy way to authenticate mod actions.
     pub modhash: Option<String>,
     /// The amount of Things returned in the children Vec.
-    pub dist: u64,
+    pub dist: Option<u64>,
     /// The actual things.
-    pub children: Vec<Thing>,
+    pub children: Option<Vec<Thing>>,
     /// The fullname after this listing.
     pub after: Option<Fullname>,
     /// The fullname before this listing.
@@ -29,8 +29,8 @@ impl Default for Listing {
     fn default() -> Self {
         Listing {
             modhash: None,
-            dist: 0,
-            children: Vec::new(),
+            dist: None,
+            children: None,
             after: None,
             before: None,
             limit: None,
