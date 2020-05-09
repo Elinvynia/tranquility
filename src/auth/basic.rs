@@ -25,16 +25,16 @@ pub struct BasicAuth {
 impl BasicAuth {
     /// Builder for the BasicAuth method.
     pub async fn new(
-        client_id: String,
-        secret_key: String,
-        username: String,
-        password: String,
+        client_id: &str,
+        secret_key: &str,
+        username: &str,
+        password: &str,
     ) -> Self {
         BasicAuth {
-            client_id,
-            secret_key,
-            username,
-            password,
+            client_id: client_id.to_string(),
+            secret_key: secret_key.to_string(),
+            username: username.to_string(),
+            password: password.to_string(),
             http_client: HttpClient::new(),
             expiration: Arc::new(RwLock::new(Duration::from_secs(3600))),
         }
