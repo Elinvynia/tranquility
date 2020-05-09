@@ -6,9 +6,9 @@ use crate::{
     client::Client,
     error::Error,
     model::{
-        fullname::Fullname, link::Link, submission_type::SubmissionType,
-        subreddit_type::SubredditType, quarantine_permissions::QuarantinePermissions,
-        size::Size, comment_sort::CommentSort
+        comment_sort::CommentSort, fullname::Fullname, link::Link,
+        quarantine_permissions::QuarantinePermissions, size::Size, submission_type::SubmissionType,
+        subreddit_type::SubredditType,
     },
 };
 use serde::{Deserialize, Serialize};

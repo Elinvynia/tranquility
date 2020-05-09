@@ -4,4 +4,4 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 /// The width and height.
-pub struct Size (u64, u64);
+pub struct Size(u64, u64);
