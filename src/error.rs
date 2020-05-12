@@ -15,9 +15,9 @@ pub enum Error {
     Custom(String),
     /// A header is missing.
     MissingHeader(String),
-    /// I wish there was a better way to do this.
+    /// An error occured during parsing a float.
     ParseFloatError(ParseFloatError),
-    /// I wish there was a better way to do this.
+    /// An error occured during parsing an integer.
     ParseIntError(ParseIntError),
     /// Reqwest errors.
     Reqwest(ReqwestError),

@@ -4,7 +4,11 @@ use crate::{
     auth::Auth,
     client::Client,
     error::Error,
-    model::{fullname::Fullname, subreddit::Subreddit, subreddit_type::SubredditType, user::User},
+    model::{
+        misc::{Fullname, SubredditType},
+        subreddit::Subreddit,
+        user::User,
+    },
 };
 use serde::{Deserialize, Serialize};
 

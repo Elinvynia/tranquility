@@ -6,7 +6,11 @@ use crate::{
     auth::Auth,
     client::route::Route,
     error::Error,
-    model::{link::Link, listing::Listing, subreddit::Subreddit, thing::Thing, user::User},
+    model::misc::Params,
+    model::{
+        comment::Comment, link::Link, listing::Listing, subreddit::Subreddit, thing::Thing,
+        user::User,
+    },
 };
 use futures_timer::Delay;
 use reqwest::Response;
@@ -35,10 +39,10 @@ impl<T: Auth + Send + Sync> Client<T> {
         })
     }
 
-    async fn get(&self, route: Route) -> Result<Response, Error> {
+    async fn get(&self, route: Route, params: &Params) -> Result<Response, Error> {
         let response = self
             .auth
-            .get(route, &self.access_token, &self.user_agent)
+            .get(route, &self.access_token, &self.user_agent, params)
             .await?;
 
         self.handle_ratelimit(&response).await?;
@@ -75,7 +79,9 @@ impl<T: Auth + Send + Sync> Client<T> {
 
     /// Retrieves the user information given a username.
     pub async fn user(&self, username: &str) -> Result<User, Error> {
-        let response = self.get(Route::UserAbout(username.to_string())).await?;
+        let response = self
+            .get(Route::UserAbout(username.into()), &Params::new())
+            .await?;
         let body = response.text().await?;
         let thing: Thing = serde_json::from_str(&body)?;
         let user: User = Thing::try_into(thing)?;
@@ -85,7 +91,7 @@ impl<T: Auth + Send + Sync> Client<T> {
     /// Retrieves the subreddit information given the name.
     pub async fn subreddit(&self, subreddit: &str) -> Result<Subreddit, Error> {
         let response = self
-            .get(Route::SubredditAbout(subreddit.to_string()))
+            .get(Route::SubredditAbout(subreddit.into()), &Params::new())
             .await?;
         let body = response.text().await?;
         let thing: Thing = serde_json::from_str(&body)?;
@@ -93,8 +99,19 @@ impl<T: Auth + Send + Sync> Client<T> {
         Ok(user)
     }
 
+    /// Returns the comment data from its ID.
+    pub async fn comment(&self, comment: &str) -> Result<Comment, Error> {
+        let response = self
+            .get(Route::Info, Params::new().add("id", comment))
+            .await?;
+        let body = response.text().await?;
+        let thing: Thing = serde_json::from_str(&body)?;
+        let comment: Comment = Thing::try_into(thing)?;
+        Ok(comment)
+    }
+
     pub(crate) async fn get_posts(&self, route: Route) -> Result<Vec<Link>, Error> {
-        let response = self.get(route).await?;
+        let response = self.get(route, &Params::new()).await?;
         let body = response.text().await?;
         let thing: Thing = serde_json::from_str(&body)?;
         let listing: Listing = Thing::try_into(thing)?;

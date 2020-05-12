@@ -27,6 +27,8 @@ pub enum Thing {
     Award(Award),
     /// Listing "Listing"
     Listing(Listing),
+    /// More comments "more"
+    More(String),
 }
 
 impl<'de> Deserialize<'de> for Thing {
@@ -46,40 +48,45 @@ impl<'de> Deserialize<'de> for Thing {
 
         Ok(match kind {
             "t1" => {
-                let value: Comment = serde_json::from_value(data.clone())
-                    .map_err(|_| DeError::custom("failed to deserialize data"))?;
+                let value: Comment = serde_json::from_value(data.clone()).map_err(|_| {
+                    DeError::custom("failed to deserialize thing data into comment")
+                })?;
                 Thing::Comment(value)
             }
             "t2" => {
                 let value: User = serde_json::from_value(data.clone())
-                    .map_err(|_| DeError::custom("failed to deserialize data"))?;
+                    .map_err(|_| DeError::custom("failed to deserialize thing data into user"))?;
                 Thing::Account(value)
             }
             "t3" => {
                 let value: Link = serde_json::from_value(data.clone())
-                    .map_err(|_| DeError::custom("failed to deserialize data"))?;
+                    .map_err(|_| DeError::custom("failed to deserialize thing data"))?;
                 Thing::Link(value)
             }
             "t4" => {
-                let value: Message = serde_json::from_value(data.clone())
-                    .map_err(|_| DeError::custom("failed to deserialize data"))?;
+                let value: Message = serde_json::from_value(data.clone()).map_err(|_| {
+                    DeError::custom("failed to deserialize thing data into message")
+                })?;
                 Thing::Message(value)
             }
             "t5" => {
-                let value: Subreddit = serde_json::from_value(data.clone())
-                    .map_err(|_| DeError::custom("failed to deserialize data"))?;
+                let value: Subreddit = serde_json::from_value(data.clone()).map_err(|_| {
+                    DeError::custom("failed to deserialize thing data into subreddit")
+                })?;
                 Thing::Subreddit(value)
             }
             "t6" => {
                 let value: Award = serde_json::from_value(data.clone())
-                    .map_err(|_| DeError::custom("failed to deserialize data"))?;
+                    .map_err(|_| DeError::custom("failed to deserialize thing data into award"))?;
                 Thing::Award(value)
             }
             "Listing" => {
-                let value: Listing = serde_json::from_value(data.clone())
-                    .map_err(|_| DeError::custom("failed to deserialize data"))?;
+                let value: Listing = serde_json::from_value(data.clone()).map_err(|_| {
+                    DeError::custom("failed to deserialize thing data into listing")
+                })?;
                 Thing::Listing(value)
             }
+            "more" => todo!(),
             _ => unreachable!(),
         })
     }

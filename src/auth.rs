@@ -1,6 +1,6 @@
 //! Contains the auth methods you can use for the client.
 
-use crate::{client::route::Route, error::Error};
+use crate::{client::route::Route, error::Error, model::misc::Params};
 use async_trait::async_trait;
 use reqwest::Response;
 
@@ -15,7 +15,13 @@ pub trait Auth {
     }
 
     /// Performs a GET request using the auth method.
-    async fn get(&self, _route: Route, _key: &str, _user_agent: &str) -> Result<Response, Error> {
+    async fn get(
+        &self,
+        _route: Route,
+        _key: &str,
+        _user_agent: &str,
+        _params: &Params,
+    ) -> Result<Response, Error> {
         unimplemented!()
     }
 }

@@ -1,6 +1,6 @@
 //! Module containing the Listing struct.
 
-use crate::model::{fullname::Fullname, thing::Thing};
+use crate::model::{misc::Fullname, thing::Thing};
 use serde::{Deserialize, Serialize};
 
 /// Listing is the general struct returned by most methods, containing the actual data and options to filter the data returned.

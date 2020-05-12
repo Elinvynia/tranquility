@@ -1,19 +1,14 @@
-use std::convert::TryInto;
+use std::convert::TryFrom;
 use std::{fs::File, io::prelude::*, path::Path};
 use tranquility::model::prelude::*;
 
-macro_rules! test_deser {
-    ($filename:expr, $thing:ident, $struct:ident) => {
+macro_rules! deser_from_file {
+    ($filename:expr, $struct:ident) => {{
         let contents = get_file!($filename);
-        let thing: $thing = serde_json::from_str(&contents).expect("Failed to deserialize.");
-        let _deserialized: $struct = $thing::try_into(thing).expect("Failed to convert.");
-    };
-
-    ($filename:expr, $struct:ident) => {
-        let contents = get_file!($filename);
-        let _deserialized: $struct =
+        let deserialized: $struct =
             serde_json::from_str(&contents).expect("Failed to deserialize.");
-    };
+        deserialized
+    }};
 }
 
 macro_rules! get_file {
@@ -29,21 +24,13 @@ macro_rules! get_file {
 }
 
 #[test]
-fn test_user() {
-    test_deser!("user", Thing, User);
+fn test_user_about() {
+    let thing: Thing = deser_from_file!("user-about", Thing);
+    assert!(User::try_from(thing).is_ok())
 }
 
 #[test]
-fn test_subreddit() {
-    test_deser!("subreddit", Thing, Subreddit);
-}
-
-#[test]
-fn test_comment() {
-    test_deser!("comment", Thing, Comment);
-}
-
-#[test]
-fn test_link() {
-    test_deser!("link", Thing, Link);
+fn test_subreddit_about() {
+    let thing: Thing = deser_from_file!("subreddit-about", Thing);
+    assert!(Subreddit::try_from(thing).is_ok())
 }

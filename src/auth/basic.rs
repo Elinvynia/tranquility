@@ -1,6 +1,6 @@
 //! The basic authentication method, using a reddit username and password.
 
-use crate::{auth::Auth, client::route::Route, error::Error};
+use crate::{auth::Auth, client::route::Route, error::Error, model::misc::Params};
 use async_trait::async_trait;
 use reqwest::{Client as HttpClient, Response};
 use std::sync::{Arc, RwLock};
@@ -24,12 +24,7 @@ pub struct BasicAuth {
 
 impl BasicAuth {
     /// Builder for the BasicAuth method.
-    pub async fn new(
-        client_id: &str,
-        secret_key: &str,
-        username: &str,
-        password: &str,
-    ) -> Self {
+    pub async fn new(client_id: &str, secret_key: &str, username: &str, password: &str) -> Self {
         BasicAuth {
             client_id: client_id.to_string(),
             secret_key: secret_key.to_string(),
@@ -84,7 +79,13 @@ impl Auth for BasicAuth {
         Ok(token)
     }
 
-    async fn get(&self, route: Route, key: &str, user_agent: &str) -> Result<Response, Error> {
+    async fn get(
+        &self,
+        route: Route,
+        key: &str,
+        user_agent: &str,
+        params: &Params,
+    ) -> Result<Response, Error> {
         let mut login = false;
         {
             let exp = self
@@ -108,6 +109,7 @@ impl Auth for BasicAuth {
             .http_client
             .get(&format!("{}{}", route.to_string(), "?raw_json=1"))
             .header("User-Agent", user_agent)
+            .query(params)
             .bearer_auth(key);
 
         let response = request.send().await?;

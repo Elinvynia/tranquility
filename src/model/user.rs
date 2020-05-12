@@ -32,8 +32,6 @@ pub struct User {
     pub link_karma: i64,
     /// The name of the user.
     pub name: String,
-    /// If the user's snoovatar should be shown.
-    pub pref_show_snoovatar: bool,
     /// The user's subreddit.
     pub subreddit: UserSubreddit,
     /// If the user is verified.
