@@ -14,6 +14,7 @@ use crate::{
 };
 use futures_timer::Delay;
 use reqwest::Response;
+use serde_json::{Map, Value};
 use std::convert::TryInto;
 use std::time::Duration;
 
@@ -43,6 +44,16 @@ impl<T: Auth + Send + Sync> Client<T> {
         let response = self
             .auth
             .get(route, &self.access_token, &self.user_agent, params)
+            .await?;
+
+        self.handle_ratelimit(&response).await?;
+        Ok(response)
+    }
+
+    async fn post(&self, route: Route, params: &Params) -> Result<Response, Error> {
+        let response = self
+            .auth
+            .post(route, &self.access_token, &self.user_agent, params)
             .await?;
 
         self.handle_ratelimit(&response).await?;
@@ -102,12 +113,25 @@ impl<T: Auth + Send + Sync> Client<T> {
     /// Returns the comment data from its ID.
     pub async fn comment(&self, comment: &str) -> Result<Comment, Error> {
         let response = self
-            .get(Route::Info, Params::new().add("id", comment))
+            .get(
+                Route::Info,
+                Params::new().add("id", &format!("t1_{}", comment)),
+            )
             .await?;
         let body = response.text().await?;
         let thing: Thing = serde_json::from_str(&body)?;
-        let comment: Comment = Thing::try_into(thing)?;
-        Ok(comment)
+        let children: Vec<Comment> = Thing::try_into(thing)?;
+        let comment = children.first().ok_or_else(|| "No comment")?;
+        Ok(comment.clone())
+    }
+
+    /// Returns the link data from its ID.
+    pub async fn link(&self, link: &str) -> Result<Link, Error> {
+        let response = self.get(Route::Info, Params::new().add("id", link)).await?;
+        let body = response.text().await?;
+        let thing: Thing = serde_json::from_str(&body)?;
+        let link: Link = Thing::try_into(thing)?;
+        Ok(link)
     }
 
     pub(crate) async fn get_posts(&self, route: Route) -> Result<Vec<Link>, Error> {
@@ -124,5 +148,35 @@ impl<T: Auth + Send + Sync> Client<T> {
             }
         }
         Ok(links)
+    }
+
+    pub(crate) async fn submit_comment(&self, thing_id: &str, body: &str) -> Result<(), Error> {
+        let response = self
+            .post(
+                Route::Comment,
+                Params::new()
+                    .add("thing_id", thing_id)
+                    .add("text", body)
+                    .add("api_type", "json"),
+            )
+            .await?;
+        let body = response.text().await?;
+        let parsed: Map<String, Value> = serde_json::from_str(&body)?;
+        let json = parsed
+            .get("json")
+            .ok_or_else(|| "Invalid response 1")?
+            .as_object()
+            .ok_or_else(|| "Invalid response 2")?;
+        let errors: Vec<Value> = json
+            .get("errors")
+            .ok_or_else(|| "Invalid response 3")?
+            .as_array()
+            .ok_or_else(|| "Invalid response 4")?
+            .clone();
+        if errors.is_empty() {
+            Ok(())
+        } else {
+            Err(Error::Custom("Invalid response 5".into()))
+        }
     }
 }

@@ -1,4 +1,4 @@
-use std::convert::TryFrom;
+use std::convert::{TryFrom, TryInto};
 use std::{fs::File, io::prelude::*, path::Path};
 use tranquility::model::prelude::*;
 
@@ -33,4 +33,18 @@ fn test_user_about() {
 fn test_subreddit_about() {
     let thing: Thing = deser_from_file!("subreddit-about", Thing);
     assert!(Subreddit::try_from(thing).is_ok())
+}
+
+#[test]
+fn test_info_comment() {
+    let thing: Thing = deser_from_file!("info-comment", Thing);
+    let children: Vec<Comment> = Thing::try_into(thing).expect("Expected children");
+    assert!(children.first().is_some())
+}
+
+#[test]
+fn test_info_link() {
+    let thing: Thing = deser_from_file!("info-link", Thing);
+    let children: Vec<Link> = Thing::try_into(thing).expect("Expected children");
+    assert!(children.first().is_some())
 }

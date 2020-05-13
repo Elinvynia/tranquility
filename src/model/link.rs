@@ -4,11 +4,7 @@ use crate::{
     auth::Auth,
     client::Client,
     error::Error,
-    model::{
-        misc::{Fullname, SubredditType},
-        subreddit::Subreddit,
-        user::User,
-    },
+    model::{comment::Comment, misc::Fullname, subreddit::Subreddit, user::User},
 };
 use serde::{Deserialize, Serialize};
 
@@ -19,41 +15,14 @@ pub struct Link {
     pub title: String,
     /// The username of the author who submitted the link.
     pub author: String,
-    /// Whether contest mode is enabled for this link.
-    pub contest_mode: bool,
-    /// The amount of upvotes.
-    pub ups: u64,
-    /// The amount of downvotes.
-    pub downs: u64,
-    /// The `Fullname` of the user that submitted this post.
-    pub author_fullname: Fullname,
-    /// The score of this post.
+    /// The score of this post, fuzzed.
     pub score: i64,
-    /// If this post has been edited.
-    pub edited: bool,
-    /// If this post is archived (can't vote or comment on it anymore)
-    pub archived: bool,
-    /// Whether this post is currently pinned.
-    pub pinned: bool,
     /// The amount of comments.
     pub num_comments: u64,
-    /// If robots can index this post.
-    pub is_robot_indexable: bool,
-    /// If the score is hidden or not.
-    pub hide_score: bool,
-    /// The ratio of upvotes to downvotes.
-    pub upvote_ratio: f64,
-    /// The `Fullname` of this link.
-    #[serde(rename = "name")]
-    pub fullname: Fullname,
-    /// The type of the subreddit where this link was posted.
-    pub subreddit_type: SubredditType,
-    /// The name of the subreddit where this link was posted.
+    /// The name of this subreddit.
     pub subreddit: String,
-    /// The subreddit name prefixed with `r/`
-    pub subreddit_name_prefixed: String,
-    /// If this post is hidden.
-    pub hidden: bool,
+    /// The fullname of this Link.
+    pub name: Fullname,
 }
 
 impl Link {
@@ -68,5 +37,22 @@ impl Link {
         client: &Client<T>,
     ) -> Result<Subreddit, Error> {
         client.subreddit(&self.subreddit).await
+    }
+
+    /// Returns the first-level replies to this post.
+    pub async fn replies<T: Auth + Send + Sync>(
+        &self,
+        _client: &Client<T>,
+    ) -> Result<Vec<Comment>, Error> {
+        todo!()
+    }
+
+    /// Creates a top-level comment in this Link.
+    pub async fn reply<T: Auth + Send + Sync>(
+        &self,
+        client: &Client<T>,
+        body: &str,
+    ) -> Result<(), Error> {
+        client.submit_comment(self.name.as_ref(), body).await
     }
 }

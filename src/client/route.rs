@@ -9,6 +9,7 @@ pub enum Route {
     SubredditRising(String),
     SubredditArticle(String, String),
     Info,
+    Comment,
 }
 
 impl fmt::Display for Route {
@@ -22,6 +23,7 @@ impl fmt::Display for Route {
             Route::SubredditRising(sr) => format!("/r/{}/rising", sr),
             Route::SubredditArticle(s, a) => format!("/r/{}/comments/{}", s, a),
             Route::Info => "/api/info".into(),
+            Route::Comment => "/api/comment".into(),
         };
         write!(f, "{}{}", base, route)
     }

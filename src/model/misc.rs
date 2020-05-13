@@ -86,7 +86,8 @@ pub enum LinkSort {
 /// Parameters for a GET query.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Params {
-    params: Vec<(String, String)>,
+    /// The parameters are a key-value tuple of Strings.
+    pub params: Vec<(String, String)>,
 }
 
 impl Params {
@@ -109,5 +110,19 @@ impl Default for Params {
 }
 
 /// Fullname is the reddit unique ID for a thing, including the type prefix.
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Fullname(String);
+
+impl AsRef<str> for Fullname {
+    fn as_ref(&self) -> &str {
+        &self.0
+    }
+}
+
+impl Fullname {
+    /// Gets the ID36 portion of a Fullname.
+    pub fn name(&self) -> String {
+        let parts: Vec<&str> = self.as_ref().split('_').collect();
+        parts[1].to_owned()
+    }
+}

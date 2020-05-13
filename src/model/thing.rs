@@ -11,6 +11,7 @@ use serde_json::{Map, Value};
 use std::convert::TryFrom;
 
 /// An enum representing the kind of wrapped reddit API responses.
+#[allow(clippy::large_enum_variant)]
 #[derive(Debug, Clone, Serialize)]
 pub enum Thing {
     /// Comment "t1"
@@ -128,6 +129,23 @@ impl TryFrom<Thing> for Comment {
     }
 }
 
+impl TryFrom<Thing> for Vec<Comment> {
+    type Error = Error;
+    fn try_from(value: Thing) -> Result<Self, Self::Error> {
+        match value {
+            Thing::Listing(l) => l
+                .children
+                .ok_or_else(|| Error::Serde(DeError::custom("Listing has no children")))?
+                .into_iter()
+                .map(Comment::try_from)
+                .collect(),
+            _ => Err(Error::Serde(DeError::custom(
+                "failed to convert Thing to Vec<Comment>",
+            ))),
+        }
+    }
+}
+
 impl TryFrom<Thing> for Link {
     type Error = Error;
     fn try_from(value: Thing) -> Result<Self, Self::Error> {
@@ -135,6 +153,23 @@ impl TryFrom<Thing> for Link {
             Thing::Link(l) => Ok(l),
             _ => Err(Error::Serde(DeError::custom(
                 "failed to convert Thing to Link",
+            ))),
+        }
+    }
+}
+
+impl TryFrom<Thing> for Vec<Link> {
+    type Error = Error;
+    fn try_from(value: Thing) -> Result<Self, Self::Error> {
+        match value {
+            Thing::Listing(l) => l
+                .children
+                .ok_or_else(|| Error::Serde(DeError::custom("Listing has no children")))?
+                .into_iter()
+                .map(Link::try_from)
+                .collect(),
+            _ => Err(Error::Serde(DeError::custom(
+                "failed to convert Thing to Vec<Link>",
             ))),
         }
     }

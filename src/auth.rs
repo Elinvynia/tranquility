@@ -24,4 +24,15 @@ pub trait Auth {
     ) -> Result<Response, Error> {
         unimplemented!()
     }
+
+    /// Performs a POST request using the auth method.
+    async fn post(
+        &self,
+        _route: Route,
+        _key: &str,
+        _user_agent: &str,
+        _params: &Params,
+    ) -> Result<Response, Error> {
+        unimplemented!()
+    }
 }

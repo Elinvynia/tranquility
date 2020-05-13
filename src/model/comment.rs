@@ -4,7 +4,7 @@ use crate::{
     auth::Auth,
     client::Client,
     error::Error,
-    model::{link::Link, listing::Listing, user::User},
+    model::{link::Link, misc::Fullname, user::User},
 };
 use serde::{Deserialize, Serialize};
 
@@ -13,8 +13,14 @@ use serde::{Deserialize, Serialize};
 pub struct Comment {
     /// The username of the author of this comment. If you want to get the User you should use the `author()` method.
     pub author: String,
-
-    replies: Option<Listing>,
+    /// The Fullname of the Link this Comment belongs to.
+    pub link_id: Fullname,
+    /// The fullname of the Subreddit this Comment belongs to.
+    pub subreddit_id: Fullname,
+    /// The Fullname of the parent (either another Comment, or the Link)
+    pub parent_id: Fullname,
+    /// The Fullname of this Comment.
+    pub name: Fullname,
 }
 
 impl Comment {
@@ -27,28 +33,33 @@ impl Comment {
     pub async fn replies<T: Auth + Send + Sync>(
         &self,
         _client: &Client<T>,
-    ) -> Result<Option<Vec<Comment>>, Error> {
-        if self.replies.is_none() {
-            return Ok(None);
-        }
+    ) -> Result<Vec<Comment>, Error> {
         todo!()
     }
 
     /// Returns the parent of this comment, if it exists.
     pub async fn parent<T: Auth + Send + Sync>(
         &self,
-        _client: &Client<T>,
+        client: &Client<T>,
     ) -> Result<Option<Comment>, Error> {
-        todo!()
+        if self.parent_id == self.subreddit_id {
+            return Ok(None);
+        }
+        let parent_comment = client.comment(&self.parent_id.name()).await?;
+        Ok(Some(parent_comment))
     }
 
     /// Returns the link where this comment was made.
-    pub async fn link<T: Auth + Send + Sync>(&self, _client: &Client<T>) -> Result<Link, Error> {
-        todo!()
+    pub async fn link<T: Auth + Send + Sync>(&self, client: &Client<T>) -> Result<Link, Error> {
+        client.link(self.link_id.as_ref()).await
     }
 
     /// Send a reply to this comment.
-    pub async fn reply<T: Auth + Send + Sync>(&self, _client: &Client<T>) -> Result<(), Error> {
-        todo!()
+    pub async fn reply<T: Auth + Send + Sync>(
+        &self,
+        client: &Client<T>,
+        body: &str,
+    ) -> Result<(), Error> {
+        client.submit_comment(self.name.as_ref(), body).await
     }
 }
