@@ -164,7 +164,10 @@ impl<T: Auth + Send + Sync> Client<T> {
         let mut listings: Vec<Thing> = serde_json::from_str(&body)?;
         let listing: Listing = Thing::try_into(listings.remove(1))?;
         let mut comment: Vec<Comment> = Listing::try_into(listing)?;
-        let replies: Thing = *comment.remove(0).replies.ok_or_else(|| Error::Custom("no replies".into()))?;
+        let replies: Thing = *comment
+            .remove(0)
+            .replies
+            .ok_or_else(|| Error::Custom("no replies".into()))?;
         let comments: Vec<Comment> = Thing::try_into(replies)?;
         Ok(comments)
     }

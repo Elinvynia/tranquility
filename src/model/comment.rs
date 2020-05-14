@@ -4,7 +4,7 @@ use crate::{
     auth::Auth,
     client::Client,
     error::Error,
-    model::{link::Link, misc::Fullname, user::User, thing::Thing},
+    model::{link::Link, misc::Fullname, thing::Thing, user::User},
 };
 use serde::{Deserialize, Serialize};
 use std::convert::TryInto;

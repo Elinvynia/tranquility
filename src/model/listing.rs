@@ -48,10 +48,8 @@ impl TryFrom<Listing> for Vec<Comment> {
         let children: Vec<Thing> = value
             .children
             .ok_or_else(|| Error::Custom("no children".into()))?;
-        let comments: Result<Vec<Comment>, Error> = children
-            .into_iter()
-            .map(Thing::try_into)
-            .collect();
+        let comments: Result<Vec<Comment>, Error> =
+            children.into_iter().map(Thing::try_into).collect();
         comments
     }
 }
