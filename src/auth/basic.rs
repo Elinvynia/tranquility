@@ -109,7 +109,7 @@ impl Auth for BasicAuth {
             .http_client
             .get(&format!("{}{}", route.to_string(), "?raw_json=1"))
             .header("User-Agent", user_agent)
-            .query(&params.params)
+            .query(&params)
             .bearer_auth(key);
 
         let response = request.send().await?;
@@ -147,7 +147,7 @@ impl Auth for BasicAuth {
             .http_client
             .post(&format!("{}{}", route.to_string(), "?raw_json=1"))
             .header("User-Agent", user_agent)
-            .query(&params.params)
+            .query(&params)
             .bearer_auth(key);
 
         let response = request.send().await?;

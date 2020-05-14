@@ -40,7 +40,7 @@ impl<'de> Deserialize<'de> for Thing {
         let outer: Map<String, Value> = Map::deserialize(deserializer)?;
         let kind = outer
             .get("kind")
-            .ok_or_else(|| DeError::custom("expected kind field"))?
+            .ok_or_else(|| DeError::custom(format!("expected kind field: {:?}", &outer)))?
             .as_str()
             .ok_or_else(|| DeError::custom("expected kind field"))?;
         let data = outer
@@ -49,41 +49,65 @@ impl<'de> Deserialize<'de> for Thing {
 
         Ok(match kind {
             "t1" => {
-                let value: Comment = serde_json::from_value(data.clone()).map_err(|_| {
-                    DeError::custom("failed to deserialize thing data into comment")
+                let mut data = data.clone();
+                if let Some(x) = data.get_mut("replies") {
+                    if x.as_str() == Some("") {
+                        x.take();
+                    }
+                };
+                let value: Comment = serde_json::from_value(data).map_err(|e| {
+                    DeError::custom(format!(
+                        "failed to deserialize thing data into comment{}",
+                        e
+                    ))
                 })?;
                 Thing::Comment(value)
             }
             "t2" => {
-                let value: User = serde_json::from_value(data.clone())
-                    .map_err(|_| DeError::custom("failed to deserialize thing data into user"))?;
+                let value: User = serde_json::from_value(data.clone()).map_err(|e| {
+                    DeError::custom(format!("failed to deserialize thing data into user: {}", e))
+                })?;
                 Thing::Account(value)
             }
             "t3" => {
-                let value: Link = serde_json::from_value(data.clone())
-                    .map_err(|_| DeError::custom("failed to deserialize thing data"))?;
+                let value: Link = serde_json::from_value(data.clone()).map_err(|e| {
+                    DeError::custom(format!("failed to deserialize thing data: {}", e))
+                })?;
                 Thing::Link(value)
             }
             "t4" => {
-                let value: Message = serde_json::from_value(data.clone()).map_err(|_| {
-                    DeError::custom("failed to deserialize thing data into message")
+                let value: Message = serde_json::from_value(data.clone()).map_err(|e| {
+                    DeError::custom(format!(
+                        "failed to deserialize thing data into message: {}",
+                        e
+                    ))
                 })?;
                 Thing::Message(value)
             }
             "t5" => {
-                let value: Subreddit = serde_json::from_value(data.clone()).map_err(|_| {
-                    DeError::custom("failed to deserialize thing data into subreddit")
+                let value: Subreddit = serde_json::from_value(data.clone()).map_err(|e| {
+                    DeError::custom(format!(
+                        "failed to deserialize thing data into subreddit: {}",
+                        e
+                    ))
                 })?;
                 Thing::Subreddit(value)
             }
             "t6" => {
-                let value: Award = serde_json::from_value(data.clone())
-                    .map_err(|_| DeError::custom("failed to deserialize thing data into award"))?;
+                let value: Award = serde_json::from_value(data.clone()).map_err(|e| {
+                    DeError::custom(format!(
+                        "failed to deserialize thing data into award: {}",
+                        e
+                    ))
+                })?;
                 Thing::Award(value)
             }
             "Listing" => {
-                let value: Listing = serde_json::from_value(data.clone()).map_err(|_| {
-                    DeError::custom("failed to deserialize thing data into listing")
+                let value: Listing = serde_json::from_value(data.clone()).map_err(|e| {
+                    DeError::custom(format!(
+                        "failed to deserialize thing data into listing: {}",
+                        e
+                    ))
                 })?;
                 Thing::Listing(value)
             }

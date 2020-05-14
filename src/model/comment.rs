@@ -4,9 +4,10 @@ use crate::{
     auth::Auth,
     client::Client,
     error::Error,
-    model::{link::Link, misc::Fullname, user::User},
+    model::{link::Link, misc::Fullname, user::User, thing::Thing},
 };
 use serde::{Deserialize, Serialize};
+use std::convert::TryInto;
 
 /// A comment that can be anywhere.
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -21,6 +22,8 @@ pub struct Comment {
     pub parent_id: Fullname,
     /// The Fullname of this Comment.
     pub name: Fullname,
+
+    pub(crate) replies: Option<Box<Thing>>,
 }
 
 impl Comment {
@@ -32,9 +35,12 @@ impl Comment {
     /// Returns the replies to this comment only.
     pub async fn replies<T: Auth + Send + Sync>(
         &self,
-        _client: &Client<T>,
+        client: &Client<T>,
     ) -> Result<Vec<Comment>, Error> {
-        todo!()
+        if let Some(r) = self.replies.clone() {
+            return Thing::try_into(*r);
+        }
+        client.replies(self.link_id.name(), self.name.name()).await
     }
 
     /// Returns the parent of this comment, if it exists.

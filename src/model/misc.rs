@@ -61,10 +61,6 @@ pub enum SubmissionType {
     Text,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-/// The width and height.
-pub struct Size(u64, u64);
-
 #[serde(rename_all = "lowercase")]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 /// A way to sort links..
@@ -83,29 +79,26 @@ pub enum LinkSort {
     All,
 }
 
-/// Parameters for a GET query.
+/// Parameters for a GET query, a key-value tuple of Strings.
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Params {
-    /// The parameters are a key-value tuple of Strings.
-    pub params: Vec<(String, String)>,
-}
+pub struct Params(Vec<(String, String)>);
 
 impl Params {
     /// Creates a new Params struct.
     pub fn new() -> Self {
-        Self { params: Vec::new() }
+        Self(Vec::new())
     }
 
     /// Adds a parameter.
-    pub fn add(&mut self, key: &str, value: &str) -> &mut Self {
-        self.params.push((key.into(), value.into()));
+    pub fn add(mut self, key: &str, value: &str) -> Self {
+        self.0.push((key.into(), value.into()));
         self
     }
 }
 
 impl Default for Params {
     fn default() -> Self {
-        Self { params: Vec::new() }
+        Self(Vec::new())
     }
 }
 
@@ -124,5 +117,11 @@ impl Fullname {
     pub fn name(&self) -> String {
         let parts: Vec<&str> = self.as_ref().split('_').collect();
         parts[1].to_owned()
+    }
+
+    /// Gets the prefix of a Fullname (t1, t2, ...)
+    pub fn prefix(&self) -> String {
+        let parts: Vec<&str> = self.as_ref().split('_').collect();
+        parts[0].to_owned()
     }
 }

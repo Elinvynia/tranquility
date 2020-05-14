@@ -1,7 +1,9 @@
 //! Module containing the Listing struct.
 
-use crate::model::{misc::Fullname, thing::Thing};
+use crate::error::Error;
+use crate::model::{comment::Comment, misc::Fullname, thing::Thing};
 use serde::{Deserialize, Serialize};
+use std::convert::{TryFrom, TryInto};
 
 /// Listing is the general struct returned by most methods, containing the actual data and options to filter the data returned.
 #[serde(default)]
@@ -37,5 +39,19 @@ impl Default for Listing {
             count: None,
             show: None,
         }
+    }
+}
+
+impl TryFrom<Listing> for Vec<Comment> {
+    type Error = Error;
+    fn try_from(value: Listing) -> Result<Self, Self::Error> {
+        let children: Vec<Thing> = value
+            .children
+            .ok_or_else(|| Error::Custom("no children".into()))?;
+        let comments: Result<Vec<Comment>, Error> = children
+            .into_iter()
+            .map(Thing::try_into)
+            .collect();
+        comments
     }
 }

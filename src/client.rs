@@ -40,7 +40,7 @@ impl<T: Auth + Send + Sync> Client<T> {
         })
     }
 
-    async fn get(&self, route: Route, params: &Params) -> Result<Response, Error> {
+    pub(crate) async fn get(&self, route: Route, params: &Params) -> Result<Response, Error> {
         let response = self
             .auth
             .get(route, &self.access_token, &self.user_agent, params)
@@ -50,7 +50,7 @@ impl<T: Auth + Send + Sync> Client<T> {
         Ok(response)
     }
 
-    async fn post(&self, route: Route, params: &Params) -> Result<Response, Error> {
+    pub(crate) async fn post(&self, route: Route, params: &Params) -> Result<Response, Error> {
         let response = self
             .auth
             .post(route, &self.access_token, &self.user_agent, params)
@@ -115,7 +115,7 @@ impl<T: Auth + Send + Sync> Client<T> {
         let response = self
             .get(
                 Route::Info,
-                Params::new().add("id", &format!("t1_{}", comment)),
+                &Params::new().add("id", &format!("t1_{}", comment)),
             )
             .await?;
         let body = response.text().await?;
@@ -127,7 +127,9 @@ impl<T: Auth + Send + Sync> Client<T> {
 
     /// Returns the link data from its ID.
     pub async fn link(&self, link: &str) -> Result<Link, Error> {
-        let response = self.get(Route::Info, Params::new().add("id", link)).await?;
+        let response = self
+            .get(Route::Info, &Params::new().add("id", link))
+            .await?;
         let body = response.text().await?;
         let thing: Thing = serde_json::from_str(&body)?;
         let link: Link = Thing::try_into(thing)?;
@@ -150,11 +152,28 @@ impl<T: Auth + Send + Sync> Client<T> {
         Ok(links)
     }
 
+    pub(crate) async fn replies(
+        &self,
+        link_id: String,
+        name: String,
+    ) -> Result<Vec<Comment>, Error> {
+        let path = format!("/comments/{}/_/{}", link_id, name);
+        let params = Params::new().add("context", "0").add("limit", "100");
+        let response = self.get(Route::Custom(path), &params).await?;
+        let body = response.text().await?;
+        let mut listings: Vec<Thing> = serde_json::from_str(&body)?;
+        let listing: Listing = Thing::try_into(listings.remove(1))?;
+        let mut comment: Vec<Comment> = Listing::try_into(listing)?;
+        let replies: Thing = *comment.remove(0).replies.ok_or_else(|| Error::Custom("no replies".into()))?;
+        let comments: Vec<Comment> = Thing::try_into(replies)?;
+        Ok(comments)
+    }
+
     pub(crate) async fn submit_comment(&self, thing_id: &str, body: &str) -> Result<(), Error> {
         let response = self
             .post(
                 Route::Comment,
-                Params::new()
+                &Params::new()
                     .add("thing_id", thing_id)
                     .add("text", body)
                     .add("api_type", "json"),

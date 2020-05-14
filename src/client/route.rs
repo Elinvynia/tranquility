@@ -10,6 +10,8 @@ pub enum Route {
     SubredditArticle(String, String),
     Info,
     Comment,
+    Submission(String),
+    Custom(String),
 }
 
 impl fmt::Display for Route {
@@ -24,6 +26,8 @@ impl fmt::Display for Route {
             Route::SubredditArticle(s, a) => format!("/r/{}/comments/{}", s, a),
             Route::Info => "/api/info".into(),
             Route::Comment => "/api/comment".into(),
+            Route::Submission(s) => format!("/comments/{}/", s),
+            Route::Custom(c) => c.into(),
         };
         write!(f, "{}{}", base, route)
     }
