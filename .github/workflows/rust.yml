@@ -11,10 +11,13 @@ jobs:
   build:
     strategy:
       matrix:
-        type: [stable, nightly, windows, macos]
+        type: [stable, beta, nightly, windows, macos]
         include:
           - type: stable
             rust: stable
+            os: ubuntu-latest
+          - type: beta
+            rust: beta
             os: ubuntu-latest
           - type: nightly
             rust: nightly
