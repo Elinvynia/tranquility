@@ -1,6 +1,7 @@
 use std::convert::{TryFrom, TryInto};
 use std::{fs::File, io::prelude::*, path::Path};
 use tranquility::model::prelude::*;
+use tranquility::model::{listing::Listing, thing::Thing};
 
 macro_rules! deser_from_file {
     ($filename:expr, $struct:ty) => {{
