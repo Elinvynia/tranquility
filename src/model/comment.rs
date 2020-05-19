@@ -4,7 +4,7 @@ use crate::{
     auth::Auth,
     client::Client,
     error::Error,
-    model::{link::Link, misc::Fullname, thing::Thing, user::User},
+    model::{link::Link, listing::Listing, misc::Fullname, thing::Thing, user::User},
 };
 use serde::{Deserialize, Serialize};
 use std::convert::TryInto;
@@ -22,8 +22,8 @@ pub struct Comment {
     pub parent_id: Fullname,
     /// The Fullname of this Comment.
     pub name: Fullname,
-
-    pub(crate) replies: Option<Box<Thing>>,
+    /// test
+    pub replies: Option<Box<Thing>>,
 }
 
 impl Comment {
@@ -38,7 +38,9 @@ impl Comment {
         client: &Client<T>,
     ) -> Result<Vec<Comment>, Error> {
         if let Some(r) = self.replies.clone() {
-            return Thing::try_into(*r);
+            let listing: Listing = Thing::try_into(*r)?;
+            let replies: Vec<Comment> = Listing::try_into(listing)?;
+            return Ok(replies);
         }
         client.replies(self.link_id.name(), self.name.name()).await
     }

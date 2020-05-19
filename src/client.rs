@@ -120,8 +120,9 @@ impl<T: Auth + Send + Sync> Client<T> {
             .await?;
         let body = response.text().await?;
         let thing: Thing = serde_json::from_str(&body)?;
-        let children: Vec<Comment> = Thing::try_into(thing)?;
-        let comment = children.first().ok_or_else(|| "No comment")?;
+        let listing: Listing = Thing::try_into(thing)?;
+        let comments: Vec<Comment> = Listing::try_into(listing)?;
+        let comment = comments.first().ok_or_else(|| "No comment")?;
         Ok(comment.clone())
     }
 
@@ -142,12 +143,10 @@ impl<T: Auth + Send + Sync> Client<T> {
         let thing: Thing = serde_json::from_str(&body)?;
         let listing: Listing = Thing::try_into(thing)?;
         let mut links: Vec<Link> = Vec::new();
-        if let Some(c) = &listing.children {
-            for x in c {
-                let y = x.clone();
-                let link: Link = Thing::try_into(y)?;
-                links.push(link);
-            }
+        for x in &listing.children {
+            let y = x.clone();
+            let link: Link = Thing::try_into(y)?;
+            links.push(link);
         }
         Ok(links)
     }
@@ -163,13 +162,14 @@ impl<T: Auth + Send + Sync> Client<T> {
         let body = response.text().await?;
         let mut listings: Vec<Thing> = serde_json::from_str(&body)?;
         let listing: Listing = Thing::try_into(listings.remove(1))?;
-        let mut comment: Vec<Comment> = Listing::try_into(listing)?;
+        let mut comments: Vec<Comment> = Listing::try_into(listing)?;
+        let comment: Comment = comments.remove(0);
         let replies: Thing = *comment
-            .remove(0)
             .replies
-            .ok_or_else(|| Error::Custom("no replies".into()))?;
-        let comments: Vec<Comment> = Thing::try_into(replies)?;
-        Ok(comments)
+            .ok_or_else(|| Error::Custom("No replies".into()))?;
+        let replies2: Listing = Thing::try_into(replies)?;
+        let replies3: Vec<Comment> = Listing::try_into(replies2)?;
+        Ok(replies3)
     }
 
     pub(crate) async fn submit_comment(&self, thing_id: &str, body: &str) -> Result<(), Error> {
