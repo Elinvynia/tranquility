@@ -22,7 +22,7 @@ pub struct Comment {
     pub parent_id: Fullname,
     /// The Fullname of this Comment.
     pub name: Fullname,
-    /// test
+    #[doc(hidden)]
     pub replies: Option<Box<Thing>>,
 }
 
