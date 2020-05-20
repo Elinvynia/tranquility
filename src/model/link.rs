@@ -2,9 +2,9 @@
 
 use crate::{
     auth::Auth,
-    client::{Client, route::Route},
+    client::{route::Route, Client},
     error::Error,
-    model::{comment::Comment, misc::Fullname, subreddit::Subreddit, user::User, misc::Params},
+    model::{comment::Comment, misc::Fullname, misc::Params, subreddit::Subreddit, user::User},
 };
 use serde::{Deserialize, Serialize};
 
@@ -58,11 +58,20 @@ impl Link {
 
     /// Spoilers the Link assuming you have the permission to do so.
     pub async fn spoiler<T: Auth + Send + Sync>(&self, client: &Client<T>) -> Result<(), Error> {
-        client.post(Route::Spoiler, &Params::new().add("id", self.name.as_ref())).await.and(Ok(()))
+        client
+            .post(Route::Spoiler, &Params::new().add("id", self.name.as_ref()))
+            .await
+            .and(Ok(()))
     }
 
     /// Unspoilers the Link assuming you have the permission to do so.
     pub async fn unspoiler<T: Auth + Send + Sync>(&self, client: &Client<T>) -> Result<(), Error> {
-        client.post(Route::Unspoiler, &Params::new().add("id", self.name.as_ref())).await.and(Ok(()))
+        client
+            .post(
+                Route::Unspoiler,
+                &Params::new().add("id", self.name.as_ref()),
+            )
+            .await
+            .and(Ok(()))
     }
 }
