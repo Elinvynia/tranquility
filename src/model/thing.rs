@@ -2,7 +2,7 @@
 
 use crate::error::Error;
 use crate::model::{
-    award::Award, comment::Comment, link::Link, listing::Listing, message::Message,
+    award::Award, comment::Comment, link::Link, listing::Listing, message::Message, more::More,
     subreddit::Subreddit, user::User,
 };
 use serde::de::Error as DeError;
@@ -29,7 +29,7 @@ pub enum Thing {
     /// Listing "Listing"
     Listing(Listing),
     /// More comments "more"
-    More(String),
+    More(More),
 }
 
 impl<'de> Deserialize<'de> for Thing {
@@ -111,7 +111,12 @@ impl<'de> Deserialize<'de> for Thing {
                 })?;
                 Thing::Listing(value)
             }
-            "more" => todo!(),
+            "more" => {
+                let value: More = serde_json::from_value(data.clone()).map_err(|e| {
+                    DeError::custom(format!("failed to deserialize thing data into more: {}", e))
+                })?;
+                Thing::More(value)
+            }
             _ => unreachable!(),
         })
     }
@@ -172,6 +177,18 @@ impl TryFrom<Thing> for Listing {
             Thing::Listing(l) => Ok(l),
             _ => Err(Error::Serde(DeError::custom(
                 "failed to convert Thing to Listing",
+            ))),
+        }
+    }
+}
+
+impl TryFrom<Thing> for More {
+    type Error = Error;
+    fn try_from(value: Thing) -> Result<Self, Self::Error> {
+        match value {
+            Thing::More(m) => Ok(m),
+            _ => Err(Error::Serde(DeError::custom(
+                "failed to convert Thing to More",
             ))),
         }
     }

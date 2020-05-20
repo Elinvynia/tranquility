@@ -1,7 +1,7 @@
 use std::convert::{TryFrom, TryInto};
 use std::{fs::File, io::prelude::*, path::Path};
 use tranquility::model::prelude::*;
-use tranquility::model::{listing::Listing, thing::Thing};
+use tranquility::model::{listing::Listing, more::More, thing::Thing};
 
 macro_rules! deser_from_file {
     ($filename:expr, $struct:ty) => {{
@@ -62,4 +62,13 @@ fn test_article_comments() {
     let replies2: Listing = Thing::try_into(replies).unwrap();
     let replies3: Vec<Comment> = Listing::try_into(replies2).unwrap();
     assert_eq!(replies3.len(), 1)
+}
+
+#[test]
+fn test_morechildren() {
+    let mut things: Vec<Thing> = deser_from_file!("morechildren", Vec<Thing>);
+    let listing: Listing = Thing::try_into(things.remove(1)).unwrap();
+    let mut things2: Vec<Thing> = listing.children;
+    let more: More = Thing::try_into(things2.remove(things2.len() - 1)).unwrap();
+    assert_eq!(more.children.len(), 274)
 }

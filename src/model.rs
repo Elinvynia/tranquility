@@ -7,6 +7,8 @@ pub mod link;
 pub mod listing;
 pub mod message;
 pub mod misc;
+#[doc(hidden)]
+pub mod more;
 pub mod prelude;
 pub mod subreddit;
 #[doc(hidden)]
