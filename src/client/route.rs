@@ -14,6 +14,7 @@ pub enum Route {
     Custom(String),
     Spoiler,
     Unspoiler,
+    ReportAward,
 }
 
 impl fmt::Display for Route {
@@ -32,6 +33,7 @@ impl fmt::Display for Route {
             Route::Custom(c) => c.into(),
             Route::Spoiler => "/api/spoiler".into(),
             Route::Unspoiler => "/api/unspoiler".into(),
+            Route::ReportAward => "/api/report_award".into(),
         };
         write!(f, "{}{}", base, route)
     }
