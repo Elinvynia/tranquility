@@ -121,19 +121,24 @@ impl<T: Auth + Send + Sync> Client<T> {
         let body = response.text().await?;
         let thing: Thing = serde_json::from_str(&body)?;
         let listing: Listing = Thing::try_into(thing)?;
-        let comments: Vec<Comment> = Listing::try_into(listing)?;
-        let comment = comments.first().ok_or_else(|| "No comment")?;
-        Ok(comment.clone())
+        let mut comments: Vec<Comment> = Listing::try_into(listing)?;
+        let comment = comments.remove(0);
+        Ok(comment)
     }
 
     /// Returns the link data from its ID.
     pub async fn link(&self, link: &str) -> Result<Link, Error> {
         let response = self
-            .get(Route::Info, &Params::new().add("id", link))
+            .get(
+                Route::Info,
+                &Params::new().add("id", &format!("t3_{}", link)),
+            )
             .await?;
         let body = response.text().await?;
         let thing: Thing = serde_json::from_str(&body)?;
-        let link: Link = Thing::try_into(thing)?;
+        let listing: Listing = Thing::try_into(thing)?;
+        let mut links: Vec<Link> = Listing::try_into(listing)?;
+        let link = links.remove(0);
         Ok(link)
     }
 

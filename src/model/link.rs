@@ -4,7 +4,10 @@ use crate::{
     auth::Auth,
     client::{route::Route, Client},
     error::Error,
-    model::{comment::Comment, misc::Fullname, misc::Params, subreddit::Subreddit, user::User},
+    model::{
+        award::Award, comment::Comment, misc::Fullname, misc::Params, subreddit::Subreddit,
+        user::User,
+    },
 };
 use serde::{Deserialize, Serialize};
 
@@ -23,6 +26,8 @@ pub struct Link {
     pub subreddit: String,
     /// The fullname of this Link.
     pub name: Fullname,
+    /// All awards belonging to this Link.
+    pub all_awardings: Vec<Award>,
 }
 
 impl Link {

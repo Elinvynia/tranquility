@@ -79,6 +79,28 @@ pub enum LinkSort {
     All,
 }
 
+#[serde(rename_all = "lowercase")]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+/// The type of an award.
+pub enum AwardType {
+    /// Can be used anywhere.
+    Global,
+    /// Belonging to a subreddit.
+    Community,
+}
+
+#[serde(rename_all = "UPPERCASE")]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+/// The subtype of an award.
+pub enum AwardSubtype {
+    /// Can be used anywhere.
+    Global,
+    /// Belonging to a subreddit.
+    Community,
+    /// Premium.
+    Premium,
+}
+
 /// Parameters for a GET query, a key-value tuple of Strings.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Params(Vec<(String, String)>);
