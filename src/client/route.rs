@@ -12,6 +12,8 @@ pub enum Route {
     Comment,
     Submission(String),
     Custom(String),
+    Spoiler,
+    Unspoiler,
 }
 
 impl fmt::Display for Route {
@@ -28,6 +30,8 @@ impl fmt::Display for Route {
             Route::Comment => "/api/comment".into(),
             Route::Submission(s) => format!("/comments/{}/", s),
             Route::Custom(c) => c.into(),
+            Route::Spoiler => "/api/spoiler".into(),
+            Route::Unspoiler => "/api/unspoiler".into(),
         };
         write!(f, "{}{}", base, route)
     }
