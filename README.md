@@ -13,5 +13,5 @@ It is currently under heavy development, and as such it is not recommended for p
 [docs-badge]: https://img.shields.io/badge/docs-online-5023dd.svg?style=flat-square
 [crate-link]: https://crates.io/crates/tranquility
 [crate-version]: https://img.shields.io/crates/v/tranquility.svg?style=flat-square
-[guild]: https://discord.gg/J3ByAC3
+[guild]: https://discord.gg/WKtbGHp
 [guild-badge]: https://img.shields.io/discord/694655186232279170.svg?style=flat-square&colorB=7289DA
