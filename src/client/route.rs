@@ -11,10 +11,17 @@ pub enum Route {
     Info,
     Comment,
     Submission(String),
+    SubmissionComment(String, String),
     Custom(String),
     Spoiler,
     Unspoiler,
     ReportAward,
+    SetNSFW,
+    UnsetNSFW,
+    Lock,
+    Unlock,
+    Follow,
+    Submit,
 }
 
 impl fmt::Display for Route {
@@ -30,10 +37,17 @@ impl fmt::Display for Route {
             Route::Info => "/api/info".into(),
             Route::Comment => "/api/comment".into(),
             Route::Submission(s) => format!("/comments/{}/", s),
+            Route::SubmissionComment(s, c) => format!("/comments/{}/_/{}", s, c),
             Route::Custom(c) => c.into(),
             Route::Spoiler => "/api/spoiler".into(),
             Route::Unspoiler => "/api/unspoiler".into(),
             Route::ReportAward => "/api/report_award".into(),
+            Route::SetNSFW => "/api/marknsfw".into(),
+            Route::UnsetNSFW => "/api/unmarknsfw".into(),
+            Route::Lock => "/api/lock".into(),
+            Route::Unlock => "/api/unlock".into(),
+            Route::Follow => "/api/follow".into(),
+            Route::Submit => "/api/submit".into(),
         };
         write!(f, "{}{}", base, route)
     }

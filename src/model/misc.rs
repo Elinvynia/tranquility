@@ -51,13 +51,23 @@ pub enum CommentSort {
 
 #[serde(rename_all = "lowercase")]
 #[derive(Debug, Clone, Serialize, Deserialize)]
-/// The type of a submission.
-pub enum SubmissionType {
+/// The allowed types of submissions in a Subreddit.
+pub enum SubredditSubmissionType {
     /// All submissions allowed.
     Any,
     /// Only link submissions allowed.
     Link,
     /// Only text posts allowed.
+    Text,
+}
+
+#[serde(rename_all = "lowercase")]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+/// The type of a submission.
+pub enum SubmissionType {
+    /// URL link.
+    Link,
+    /// Self-post.
     Text,
 }
 

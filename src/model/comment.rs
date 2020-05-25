@@ -2,9 +2,9 @@
 
 use crate::{
     auth::Auth,
-    client::Client,
+    client::{Client, route::Route},
     error::Error,
-    model::{link::Link, listing::Listing, misc::Fullname, thing::Thing, user::User},
+    model::{link::Link, listing::Listing, misc::Fullname, thing::Thing, user::User, misc::Params},
 };
 use serde::{Deserialize, Serialize};
 use std::convert::TryInto;
@@ -73,5 +73,21 @@ impl Comment {
         body: &str,
     ) -> Result<(), Error> {
         client.submit_comment(self.name.as_ref(), body).await
+    }
+
+    /// Locks the Comment assuming you have the permission to do so.
+    pub async fn lock<T: Auth + Send + Sync>(&self, client: &Client<T>) -> Result<(), Error> {
+        client
+            .post(Route::Lock, &Params::new().add("id", self.name.as_ref()))
+            .await
+            .and(Ok(()))
+    }
+
+    /// Unlocks the Comment assuming you have the permission to do so.
+    pub async fn unlock<T: Auth + Send + Sync>(&self, client: &Client<T>) -> Result<(), Error> {
+        client
+            .post(Route::Unlock, &Params::new().add("id", self.name.as_ref()))
+            .await
+            .and(Ok(()))
     }
 }

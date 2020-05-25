@@ -7,7 +7,7 @@ use crate::{
     error::Error,
     model::{
         link::Link,
-        misc::{CommentSort, Fullname, QuarantinePermissions, SubmissionType, SubredditType},
+        misc::{CommentSort, Fullname, QuarantinePermissions, SubredditSubmissionType, SubredditType, Params},
     },
 };
 use serde::{Deserialize, Serialize};
@@ -48,7 +48,7 @@ pub struct Subreddit {
     /// Whether spoilers are enabled.
     pub spoilers_enabled: bool,
     /// The type of submissions that is allowed.
-    pub submission_type: SubmissionType,
+    pub submission_type: SubredditSubmissionType,
     /// If the current user is a subscriber.
     pub user_is_subscriber: bool,
     /// If the subreddit is NSFW
@@ -89,5 +89,43 @@ impl Subreddit {
         client
             .get_posts(Route::SubredditRising(self.display_name.clone()))
             .await
+    }
+
+    /// Post to a subreddit.
+    pub async fn submit<'a, T: Auth + Send + Sync>(&self, client: &'a Client<T>) -> SubmitBuilder<'a, T> {
+        SubmitBuilder::new(client)
+    }
+}
+
+#[doc(hidden)]
+#[derive(Debug, Clone)]
+pub struct SubmitBuilder<'a, T: Auth + Send + Sync>{
+    pub params: Params,
+    pub client: &'a Client<T>,
+}
+
+impl<'a, T: Auth + Send + Sync> SubmitBuilder<'a, T> {
+    pub fn new(client: &'a Client<T>) -> Self {
+        SubmitBuilder { params: Params::new().add("api_type", "json").add("sr", ""), client }
+    }
+
+    pub fn spoiler(mut self) -> Self {
+        self.params = self.params.add("spoiler", "true");
+        self
+    }
+
+    /// Whether to send replies
+    pub fn send_replies(mut self) -> Self {
+        self.params = self.params.add("sendreplies", "true");
+        self
+    }
+
+    pub fn title(mut self, title: &str) -> Self {
+        self.params = self.params.add("title", title);
+        self
+    }
+
+    pub async fn send(&self) -> Result<(), Error> {
+        self.client.post(Route::Submit, &self.params).await.and(Ok(()))
     }
 }

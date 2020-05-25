@@ -79,4 +79,52 @@ impl Link {
             .await
             .and(Ok(()))
     }
+
+    /// Adds the NSFW mark to the Link assuming you have the permission to do so.
+    pub async fn set_nsfw<T: Auth + Send + Sync>(&self, client: &Client<T>) -> Result<(), Error> {
+        client
+            .post(Route::SetNSFW, &Params::new().add("id", self.name.as_ref()))
+            .await
+            .and(Ok(()))
+    }
+
+    /// Removes the NSFW mark from the Link assuming you have the permission to do so.
+    pub async fn unset_nsfw<T: Auth + Send + Sync>(&self, client: &Client<T>) -> Result<(), Error> {
+        client
+            .post(Route::UnsetNSFW, &Params::new().add("id", self.name.as_ref()))
+            .await
+            .and(Ok(()))
+    }
+
+    /// Locks the Link assuming you have the permission to do so.
+    pub async fn lock<T: Auth + Send + Sync>(&self, client: &Client<T>) -> Result<(), Error> {
+        client
+            .post(Route::Lock, &Params::new().add("id", self.name.as_ref()))
+            .await
+            .and(Ok(()))
+    }
+
+    /// Unlocks the Link assuming you have the permission to do so.
+    pub async fn unlock<T: Auth + Send + Sync>(&self, client: &Client<T>) -> Result<(), Error> {
+        client
+            .post(Route::Unlock, &Params::new().add("id", self.name.as_ref()))
+            .await
+            .and(Ok(()))
+    }
+
+    /// Start following this link.
+    pub async fn follow<T: Auth + Send + Sync>(&self, client: &Client<T>) -> Result<(), Error> {
+        client
+            .post(Route::Follow, &Params::new().add("id", self.name.as_ref()).add("follow", "1"))
+            .await
+            .and(Ok(()))
+    }
+
+    /// Stop following this link.
+    pub async fn unfollow<T: Auth + Send + Sync>(&self, client: &Client<T>) -> Result<(), Error> {
+        client
+            .post(Route::Follow, &Params::new().add("id", self.name.as_ref()).add("follow", "0"))
+            .await
+            .and(Ok(()))
+    }
 }
