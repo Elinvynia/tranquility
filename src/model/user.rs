@@ -1,6 +1,11 @@
 //! Module related to the user struct.
 
-use crate::model::usersubreddit::UserSubreddit;
+use crate::{
+    auth::Auth,
+    client::{route::Route, Client},
+    error::Error,
+    model::{misc::Fullname, misc::Params, usersubreddit::UserSubreddit},
+};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -19,7 +24,7 @@ pub struct User {
     /// Link to the image of the user's icon.
     pub icon_img: String,
     /// The API ID of the user.
-    pub id: String,
+    pub id: Fullname,
     /// If the user is an employee of Reddit.
     pub is_employee: bool,
     /// If the user is added as a friend.
@@ -36,4 +41,62 @@ pub struct User {
     pub subreddit: UserSubreddit,
     /// If the user is verified.
     pub verified: bool,
+}
+
+impl User {
+    /// Reports the User to the reddit admins.
+    pub async fn block<T: Auth + Send + Sync>(&self, client: &Client<T>) -> Result<(), Error> {
+        client
+            .post(
+                Route::BlockUser,
+                &Params::new()
+                    .add("name", &self.name)
+                    .add("account_id", self.id.as_ref())
+                    .add("api_type", "json"),
+            )
+            .await
+            .and(Ok(()))
+    }
+
+    /// Adds the User to friends.
+    pub async fn friend<T: Auth + Send + Sync>(
+        &self,
+        client: &Client<T>,
+        note: Option<&str>,
+    ) -> Result<(), Error> {
+        client
+            .put(
+                Route::Friends(self.name.clone()),
+                &Params::new()
+                    .add("name", &self.name)
+                    .add("note", note.unwrap_or("")),
+            )
+            .await
+            .and(Ok(()))
+    }
+
+    /// Removes a User from your friends.
+    pub async fn unfriend<T: Auth + Send + Sync>(&self, client: &Client<T>) -> Result<(), Error> {
+        client
+            .delete(Route::Friends(self.name.clone()))
+            .await
+            .and(Ok(()))
+    }
+
+    /// Reports the User to the reddit admins.
+    pub async fn report<T: Auth + Send + Sync>(
+        &self,
+        client: &Client<T>,
+        reason: Option<&str>,
+    ) -> Result<(), Error> {
+        client
+            .post(
+                Route::ReportUser,
+                &Params::new()
+                    .add("user", &self.name)
+                    .add("reason", reason.unwrap_or("")),
+            )
+            .await
+            .and(Ok(()))
+    }
 }

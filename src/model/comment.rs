@@ -2,9 +2,9 @@
 
 use crate::{
     auth::Auth,
-    client::{Client, route::Route},
+    client::{route::Route, Client},
     error::Error,
-    model::{link::Link, listing::Listing, misc::Fullname, thing::Thing, user::User, misc::Params},
+    model::{link::Link, listing::Listing, misc::Fullname, misc::Params, thing::Thing, user::User},
 };
 use serde::{Deserialize, Serialize};
 use std::convert::TryInto;

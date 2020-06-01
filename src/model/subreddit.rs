@@ -7,9 +7,13 @@ use crate::{
     error::Error,
     model::{
         link::Link,
-        misc::{CommentSort, Fullname, QuarantinePermissions, SubredditSubmissionType, SubredditType, Params},
+        misc::{
+            CommentSort, Fullname, Params, QuarantinePermissions, SubredditSubmissionType,
+            SubredditType,
+        },
     },
 };
+use reqwest::Url;
 use serde::{Deserialize, Serialize};
 
 /// The struct representing a subreddit.
@@ -92,40 +96,83 @@ impl Subreddit {
     }
 
     /// Post to a subreddit.
-    pub async fn submit<'a, T: Auth + Send + Sync>(&self, client: &'a Client<T>) -> SubmitBuilder<'a, T> {
-        SubmitBuilder::new(client)
+    pub fn submit_text<'a, T: Auth + Send + Sync>(
+        &self,
+        client: &'a Client<T>,
+        title: &str,
+        text: &str,
+    ) -> SubmitBuilder<'a, T> {
+        SubmitBuilder::new_text(client, self.display_name.as_ref(), title, text)
+    }
+
+    /// Post to a subreddit.
+    pub fn submit_link<'a, T: Auth + Send + Sync, U: Into<Url>>(
+        &self,
+        client: &'a Client<T>,
+        title: &str,
+        url: U,
+    ) -> SubmitBuilder<'a, T> {
+        let u: Url = url.into();
+        SubmitBuilder::new_link(client, self.display_name.as_ref(), title, u.as_ref())
     }
 }
 
 #[doc(hidden)]
 #[derive(Debug, Clone)]
-pub struct SubmitBuilder<'a, T: Auth + Send + Sync>{
+pub struct SubmitBuilder<'a, T: Auth + Send + Sync> {
     pub params: Params,
     pub client: &'a Client<T>,
 }
 
 impl<'a, T: Auth + Send + Sync> SubmitBuilder<'a, T> {
-    pub fn new(client: &'a Client<T>) -> Self {
-        SubmitBuilder { params: Params::new().add("api_type", "json").add("sr", ""), client }
+    /// Create a new builder struct.
+    pub fn new_text(client: &'a Client<T>, subreddit: &str, title: &str, text: &str) -> Self {
+        SubmitBuilder {
+            params: Params::new()
+                .add("kind", "self")
+                .add("title", title)
+                .add("text", text)
+                .add("api_type", "json")
+                .add("sr", subreddit),
+            client,
+        }
     }
 
+    /// Create a new builder struct.
+    pub fn new_link(client: &'a Client<T>, subreddit: &str, title: &str, url: &str) -> Self {
+        SubmitBuilder {
+            params: Params::new()
+                .add("kind", "link")
+                .add("title", title)
+                .add("url", url)
+                .add("api_type", "json")
+                .add("sr", subreddit),
+            client,
+        }
+    }
+
+    /// Is this a spoiler?
     pub fn spoiler(mut self) -> Self {
         self.params = self.params.add("spoiler", "true");
         self
     }
 
-    /// Whether to send replies
+    /// Whether to send replies to your inbox.
     pub fn send_replies(mut self) -> Self {
         self.params = self.params.add("sendreplies", "true");
         self
     }
 
-    pub fn title(mut self, title: &str) -> Self {
-        self.params = self.params.add("title", title);
+    /// The title of the post.
+    pub fn nsfw(mut self) -> Self {
+        self.params = self.params.add("nsfw", "true");
         self
     }
 
+    /// Send the post.
     pub async fn send(&self) -> Result<(), Error> {
-        self.client.post(Route::Submit, &self.params).await.and(Ok(()))
+        println!("{:?}", &self.params);
+        self.client.post(Route::Submit, &self.params).await?;
+        Ok(())
     }
 }

@@ -6,7 +6,6 @@ use serde::{Deserialize, Serialize};
 use std::convert::{TryFrom, TryInto};
 
 /// Listing is the general struct returned by most methods, containing the actual data and options to filter the data returned.
-#[serde(default)]
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Listing {
     /// Legacy way to authenticate mod actions.
@@ -20,10 +19,13 @@ pub struct Listing {
     /// The fullname before this listing.
     pub before: Option<Fullname>,
     /// The maximum number of items to return in this slice of the listing.
+    #[serde(default)]
     pub limit: Option<u64>,
     /// The number of items already seen in this listing.
+    #[serde(default)]
     pub count: Option<u64>,
     /// Optional parameter to override what is shown.
+    #[serde(default)]
     pub show: Option<String>,
 }
 

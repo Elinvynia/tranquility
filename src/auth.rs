@@ -35,4 +35,25 @@ pub trait Auth {
     ) -> Result<Response, Error> {
         unimplemented!()
     }
+
+    /// Performs a DELETE request using the auth method.
+    async fn delete(
+        &self,
+        _route: Route,
+        _key: &str,
+        _user_agent: &str,
+    ) -> Result<Response, Error> {
+        unimplemented!()
+    }
+
+    /// Performs a POST request using the auth method.
+    async fn put(
+        &self,
+        _route: Route,
+        _key: &str,
+        _user_agent: &str,
+        _params: &Params,
+    ) -> Result<Response, Error> {
+        unimplemented!()
+    }
 }

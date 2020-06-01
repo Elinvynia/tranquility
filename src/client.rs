@@ -40,54 +40,6 @@ impl<T: Auth + Send + Sync> Client<T> {
         })
     }
 
-    pub(crate) async fn get(&self, route: Route, params: &Params) -> Result<Response, Error> {
-        let response = self
-            .auth
-            .get(route, &self.access_token, &self.user_agent, params)
-            .await?;
-
-        self.handle_ratelimit(&response).await?;
-        Ok(response)
-    }
-
-    pub(crate) async fn post(&self, route: Route, params: &Params) -> Result<Response, Error> {
-        let response = self
-            .auth
-            .post(route, &self.access_token, &self.user_agent, params)
-            .await?;
-
-        self.handle_ratelimit(&response).await?;
-        Ok(response)
-    }
-
-    async fn handle_ratelimit(&self, response: &Response) -> Result<(), Error> {
-        let headers = response.headers();
-        let _used: u64 = headers
-            .get("x-ratelimit-used")
-            .ok_or_else(|| Error::MissingHeader("x-ratelimit-used".to_string()))?
-            .to_str()?
-            .parse()?;
-
-        let remaining: u64 = headers
-            .get("x-ratelimit-remaining")
-            .ok_or_else(|| Error::MissingHeader("x-ratelimit-remaining".to_string()))?
-            .to_str()?
-            .parse::<f64>()?
-            .to_bits();
-
-        let reset: u64 = headers
-            .get("x-ratelimit-reset")
-            .ok_or_else(|| Error::MissingHeader("x-ratelimit-reset".to_string()))?
-            .to_str()?
-            .parse()?;
-
-        if remaining < 1 {
-            let _ = Delay::new(Duration::from_secs(reset)).await;
-        }
-
-        Ok(())
-    }
-
     /// Retrieves the user information given a username.
     pub async fn user(&self, username: &str) -> Result<User, Error> {
         let response = self
@@ -140,6 +92,87 @@ impl<T: Auth + Send + Sync> Client<T> {
         let mut links: Vec<Link> = Listing::try_into(listing)?;
         let link = links.remove(0);
         Ok(link)
+    }
+
+    /// Returns the link data from its ID.
+    pub async fn username_available(&self, username: &str) -> Result<bool, Error> {
+        let response = self
+            .get(
+                Route::UsernameAvailable,
+                &Params::new().add("user", username),
+            )
+            .await?;
+        let body = response.text().await?;
+        let available: bool = serde_json::from_str(&body)?;
+        Ok(available)
+    }
+
+    pub(crate) async fn get(&self, route: Route, params: &Params) -> Result<Response, Error> {
+        let response = self
+            .auth
+            .get(route, &self.access_token, &self.user_agent, params)
+            .await?;
+
+        self.handle_ratelimit(&response).await?;
+        Ok(response)
+    }
+
+    pub(crate) async fn post(&self, route: Route, params: &Params) -> Result<Response, Error> {
+        let response = self
+            .auth
+            .post(route, &self.access_token, &self.user_agent, params)
+            .await?;
+
+        self.handle_ratelimit(&response).await?;
+        Ok(response)
+    }
+
+    pub(crate) async fn delete(&self, route: Route) -> Result<Response, Error> {
+        let response = self
+            .auth
+            .delete(route, &self.access_token, &self.user_agent)
+            .await?;
+
+        self.handle_ratelimit(&response).await?;
+        Ok(response)
+    }
+
+    pub(crate) async fn put(&self, route: Route, params: &Params) -> Result<Response, Error> {
+        let response = self
+            .auth
+            .put(route, &self.access_token, &self.user_agent, params)
+            .await?;
+
+        self.handle_ratelimit(&response).await?;
+        Ok(response)
+    }
+
+    async fn handle_ratelimit(&self, response: &Response) -> Result<(), Error> {
+        let headers = response.headers();
+        let _used: u64 = headers
+            .get("x-ratelimit-used")
+            .ok_or_else(|| Error::MissingHeader("x-ratelimit-used".to_string()))?
+            .to_str()?
+            .parse()?;
+
+        let remaining: u64 = headers
+            .get("x-ratelimit-remaining")
+            .ok_or_else(|| Error::MissingHeader("x-ratelimit-remaining".to_string()))?
+            .to_str()?
+            .parse::<f64>()?
+            .to_bits();
+
+        let reset: u64 = headers
+            .get("x-ratelimit-reset")
+            .ok_or_else(|| Error::MissingHeader("x-ratelimit-reset".to_string()))?
+            .to_str()?
+            .parse()?;
+
+        if remaining < 1 {
+            let _ = Delay::new(Duration::from_secs(reset)).await;
+        }
+
+        Ok(())
     }
 
     pub(crate) async fn get_posts(&self, route: Route) -> Result<Vec<Link>, Error> {

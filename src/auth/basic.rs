@@ -154,4 +154,73 @@ impl Auth for BasicAuth {
 
         Ok(response)
     }
+
+    async fn delete(&self, route: Route, key: &str, user_agent: &str) -> Result<Response, Error> {
+        let mut login = false;
+        {
+            let exp = self
+                .expiration
+                .read()
+                .map_err(|_| "Expiration lock is poisoned")?;
+            if SystemTime::now()
+                .duration_since(SystemTime::UNIX_EPOCH)
+                .expect("Your system time is before Linux Epoch")
+                > *exp
+            {
+                login = true;
+            };
+        }
+
+        if login {
+            self.login().await?;
+        };
+
+        let request = self
+            .http_client
+            .delete(&format!("{}{}", route.to_string(), "?raw_json=1"))
+            .header("User-Agent", user_agent)
+            .bearer_auth(key);
+
+        let response = request.send().await?;
+
+        Ok(response)
+    }
+
+    async fn put(
+        &self,
+        route: Route,
+        key: &str,
+        user_agent: &str,
+        params: &Params,
+    ) -> Result<Response, Error> {
+        let mut login = false;
+        {
+            let exp = self
+                .expiration
+                .read()
+                .map_err(|_| "Expiration lock is poisoned")?;
+            if SystemTime::now()
+                .duration_since(SystemTime::UNIX_EPOCH)
+                .expect("Your system time is before Linux Epoch")
+                > *exp
+            {
+                login = true;
+            };
+        }
+
+        if login {
+            self.login().await?;
+        };
+
+        let request = self
+            .http_client
+            .put(&format!("{}{}", route.to_string(), "?raw_json=1"))
+            .header("User-Agent", user_agent)
+            .query(&params)
+            .bearer_auth(key);
+
+        let response = request.send().await?;
+
+        Ok(response)
+    }
 }

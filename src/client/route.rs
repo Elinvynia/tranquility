@@ -22,6 +22,11 @@ pub enum Route {
     Unlock,
     Follow,
     Submit,
+    Me,
+    Friends(String),
+    ReportUser,
+    BlockUser,
+    UsernameAvailable,
 }
 
 impl fmt::Display for Route {
@@ -48,6 +53,11 @@ impl fmt::Display for Route {
             Route::Unlock => "/api/unlock".into(),
             Route::Follow => "/api/follow".into(),
             Route::Submit => "/api/submit".into(),
+            Route::Me => "/api/v1/me".into(),
+            Route::Friends(u) => format!("/api/v1/me/friends/{}", u),
+            Route::ReportUser => "/api/report_user".into(),
+            Route::BlockUser => "/api/block_user".into(),
+            Route::UsernameAvailable => "/api/username_available".into(),
         };
         write!(f, "{}{}", base, route)
     }
