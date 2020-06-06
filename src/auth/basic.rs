@@ -57,7 +57,7 @@ impl Auth for BasicAuth {
 
         let expiration: u64 = map
             .get("expires_in")
-            .ok_or_else(|| "No `expires_in` field in response")?
+            .ok_or_else(|| "Authentication error: No `expires_in` field in response")?
             .as_u64()
             .ok_or_else(|| "`expires_in` field is an invalid type")?;
 
@@ -71,7 +71,7 @@ impl Auth for BasicAuth {
 
         let token: String = map
             .get("access_token")
-            .ok_or_else(|| "No `access_token` field in response")?
+            .ok_or_else(|| "Authentication error: No `access_token` field in response")?
             .as_str()
             .ok_or_else(|| "`access_token` field is an invalid type")?
             .to_string();
