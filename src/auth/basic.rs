@@ -1,5 +1,6 @@
 //! The basic authentication method, using a reddit username and password.
 
+use crate::error::ApiError;
 use crate::{auth::Auth, client::route::Route, error::Error, model::misc::Params};
 use async_trait::async_trait;
 use reqwest::{Client as HttpClient, Response};
