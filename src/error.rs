@@ -2,8 +2,8 @@
 
 use http::header::ToStrError;
 use reqwest::Error as ReqwestError;
-use serde_json::Error as SerdeError;
 use serde::Deserialize;
+use serde_json::Error as SerdeError;
 use std::error::Error as StdError;
 use std::num::ParseFloatError;
 use std::num::ParseIntError;
