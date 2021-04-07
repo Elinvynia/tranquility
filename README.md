@@ -1,6 +1,6 @@
-# tranquility
-
 [![ci-badge][]][ci] [![docs-badge][]][docs] [![crate-version]][crate-link]
+
+# tranquility
 
 Tranquility is an asynchronous Rust library for the Reddit API.
 
