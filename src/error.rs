@@ -2,11 +2,28 @@
 
 use http::header::ToStrError;
 use reqwest::Error as ReqwestError;
+use serde::Deserialize;
 use serde_json::Error as SerdeError;
 use std::error::Error as StdError;
 use std::num::ParseFloatError;
 use std::num::ParseIntError;
 use std::{fmt, fmt::Display};
+
+/// Generic API error type
+#[derive(Debug, Deserialize)]
+pub struct ApiError {
+    /// Error code
+    pub code: i64,
+    /// Error message
+    pub message: String,
+}
+
+impl Display for ApiError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let reason = format!("API Error ({}): {}", self.code, self.message);
+        f.write_str(&reason)
+    }
+}
 
 /// The generic error type used for handling errors within this library.
 #[derive(Debug)]
@@ -25,6 +42,8 @@ pub enum Error {
     Serde(SerdeError),
     /// I wish there was a better way to do this.
     ToStrError(ToStrError),
+    /// API error
+    ApiError(ApiError),
 }
 
 impl StdError for Error {}
@@ -39,6 +58,7 @@ impl Display for Error {
             Error::Reqwest(http_e) => format!("Reqwest Error: {:?}", http_e),
             Error::Serde(json_e) => format!("Serde Error: {:?}", json_e),
             Error::ToStrError(tostr_e) => format!("ToStr Error: {:?}", tostr_e),
+            Error::ApiError(api_e) => format!("API Error ({}): {}", api_e.code, api_e.message),
         };
         f.write_str(&reason)
     }

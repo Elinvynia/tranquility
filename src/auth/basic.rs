@@ -1,5 +1,6 @@
 //! The basic authentication method, using a reddit username and password.
 
+use crate::error::ApiError;
 use crate::{auth::Auth, client::route::Route, error::Error, model::misc::Params};
 use async_trait::async_trait;
 use reqwest::{Client as HttpClient, Response};
@@ -55,11 +56,16 @@ impl Auth for BasicAuth {
         let json: serde_json::Value = serde_json::from_str(&response)?;
         let map = json.as_object().ok_or_else(|| "Bad response")?;
 
-        let expiration: u64 = map
-            .get("expires_in")
-            .ok_or_else(|| "No `expires_in` field in response")?
-            .as_u64()
-            .ok_or_else(|| "`expires_in` field is an invalid type")?;
+        let expiration: u64 = match map.get("expires_in") {
+            Some(expiration) => expiration
+                .as_u64()
+                .ok_or_else(|| "`expires_in` field is an invalid type")?,
+            None => {
+                let error_json: ApiError = serde_json::from_str(&response)?;
+
+                return Err(Error::ApiError(error_json));
+            }
+        };
 
         {
             let mut exp = self
@@ -69,12 +75,17 @@ impl Auth for BasicAuth {
             *exp = Duration::from_secs(expiration);
         }
 
-        let token: String = map
-            .get("access_token")
-            .ok_or_else(|| "No `access_token` field in response")?
-            .as_str()
-            .ok_or_else(|| "`access_token` field is an invalid type")?
-            .to_string();
+        let token: String = match map.get("access_token") {
+            Some(token) => token
+                .as_str()
+                .ok_or_else(|| "`access_token` field is an invalid type")?
+                .to_string(),
+            None => {
+                let error_json: ApiError = serde_json::from_str(&response)?;
+
+                return Err(Error::ApiError(error_json));
+            }
+        };
 
         Ok(token)
     }
